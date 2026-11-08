@@ -65,6 +65,15 @@ Adaptive, attack-tested, eval-gated RAG platform proving: ADAPTIVE (router/Paret
 
 | Phase | Status |
 |-------|--------|
+| 0 | Done — VM live, Compose up |
+| 1 | Done — ingest, naive/hybrid, `benchmarks/phase1_retrieval.json` |
+| 2 | Started — `eval-gate` workflow + `config/eval_thresholds.yaml` |
+| 3–6 | Planned |
+
+## Phase status (detail)
+
+| Phase | Status |
+|-------|--------|
 | **0** Scaffold, MockLLM, `/health` `/query`, Compose, CI skeleton, ADR-001 | **COMPLETE locally** (tests green) |
 | 1 Ingest + retrieval + first table | **NOT STARTED** — wait for user **continue** |
 | 2+ | NOT STARTED |

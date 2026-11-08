@@ -42,7 +42,7 @@ def build_chunker(settings: Settings, embedder: Embedder) -> Chunker:
         return ContextualChunker(chunk_size=settings.chunk_size, overlap=settings.chunk_overlap)
     if settings.chunk_strategy == "semantic":
         return SemanticChunker(embedder)
-    raise ValueError(f"Unknown chunk_strategy: {settings.chunk_strategy}")
+    assert_never(settings.chunk_strategy)
 
 
 def ingest_corpus_dir(
