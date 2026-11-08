@@ -1,24 +1,24 @@
 # How SentinelRAG compares
 
-SentinelRAG is **not** trying to replace LangChain, LlamaIndex, RAGAS, or rag-ci.
-It is a **reference RAG service** where **quality and security regressions fail CI**
-without stitching together three separate tools.
+SentinelRAG is a **reference RAG service** plus **`sentinelrag-gate`** — unified supply-chain
+CI with evidence bundles, SARIF/JUnit, regression baselines, and poison benchmarks.
 
-| Capability | SentinelRAG | RAGAS / DeepEval | rag-ci / ragbench / raggate | LangChain / LlamaIndex |
-|------------|-------------|------------------|-----------------------------|-------------------------|
-| End-to-end RAG API + Qdrant | Yes | Bring your own | Bring your own | Framework |
-| Retrieval regression gate | Yes (`eval-gate`) | Manual integration | Core focus | DIY |
-| Answer faithfulness / relevance gate | Yes (`eval-gate`) | Core focus | Optional (`--judge`) | DIY |
-| **Ingest poison defense gate** | Yes (`redteam-gate`) | No | No | DIY |
-| Adaptive naive / hybrid / agentic router | Yes | No | No | Patterns exist |
-| Red-team attack harness in-repo | Yes | No | No | Rare |
-| Offline mock CI (no API spend) | Yes | Partial | Often yes | Varies |
-| PyPI / CLI eval-only tool | App + gates | Libraries | `uvx rag-ci` etc. | Ecosystem |
+| Capability | SentinelRAG |
+|------------|-------------|
+| End-to-end FastAPI + Qdrant app | Yes |
+| Single CLI gate (`sentinelrag-gate run`) | Yes |
+| Evidence artifact + policy-as-code | Yes |
+| SARIF + JUnit + PR summary | Yes |
+| Retrieval + answer quality thresholds | Yes |
+| Ingest + post-retrieval poison probes | Yes |
+| Adapter hook for external pipelines | Yes |
+| Adaptive / agentic routing + Pareto leaderboard | Yes |
+| Offline mock CI | Yes |
 
 ### Positioning one-liner
 
-**Triple-gate adaptive RAG:** fail the build on **retrieval**, **answer quality**, or
-**ingest-time poison defenses** — with routing and multi-hop in the same repo.
+**RAG supply-chain CI:** fail the build on **retrieval**, **grounding**, and **poison defenses**
+with audit artifacts — not just log lines.
 
 ### When to choose something else
 

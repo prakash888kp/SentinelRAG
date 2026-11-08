@@ -26,7 +26,8 @@ Adaptive, attack-tested, eval-gated RAG platform: **ADAPTIVE** router/Pareto,
 | Phase | Status |
 |-------|--------|
 | 0–6 | **Done** — v0.1.0, triple-gate CI |
-| OSS launch pack | **Done** — CONTRIBUTING, SECURITY, public corpus benchmark, PyPI metadata (unpublished) |
+| OSS launch pack | **Done** — CONTRIBUTING, SECURITY, public corpus, PyPI metadata |
+| Phase 7 supply-chain gate | **Done** — `sentinelrag-gate`, SARIF/JUnit, poison v1, composite Action |
 
 ## OSS positioning
 
