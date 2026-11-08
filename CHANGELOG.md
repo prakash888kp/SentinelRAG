@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1] — 2026-11-08
+
+### Added
+
+- README **live demo GIF** + SVG hero; EvalForge-style capability matrix.
+- `sentinelrag-gate import` for **promptfoo / Ragas / DeepEval** score files.
+- Docs suite: ARCHITECTURE, BENCHMARK, METRICS, CI_COOKBOOK, DEPLOYMENT, ECOSYSTEM, INTEROPERABILITY, CASE_STUDY, OSS_READINESS, PORTFOLIO, RELEASE_CHECKLIST, integrations/*, superpowers/plans.
+- JSON Schemas under `schemas/`; richer `examples/` fixtures.
+
 ## [0.2.0] — 2026-11-08
 
 ### Added
@@ -9,8 +18,6 @@
 - Citation coverage helper; expanded supply-chain gate policy.
 - Dependabot, CodeQL, CODEOWNERS, labeler, release notes config.
 - Poison benchmark v1, SARIF/JUnit evidence gate, composite Action (from 0.1.x line).
-- `sentinelrag-gate import` for **promptfoo / Ragas / DeepEval** score files.
-- Docs suite (architecture, metrics, CI cookbook, interoperability, …), JSON Schemas, demo GIF.
 
 ### Changed
 

@@ -90,7 +90,7 @@ See [INTEROPERABILITY.md](docs/INTEROPERABILITY.md).
 ### Drop into any GitHub repo
 
 ```yaml
-- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.0
+- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.1
   with:
     refresh: "true"
 ```
