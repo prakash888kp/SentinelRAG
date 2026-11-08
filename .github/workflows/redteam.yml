@@ -6,10 +6,4 @@ on:
 
 jobs:
   redteam-gate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Phase 0 placeholder
-        run: |
-          echo "Red-team gate is wired but ASR thresholds are not enforced until Phase 5."
-          echo "PASS"
+    uses: ./.github/workflows/redteam-gate.yml

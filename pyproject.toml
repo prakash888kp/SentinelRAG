@@ -1,6 +1,6 @@
 [project]
 name = "sentinelrag"
-version = "0.0.1"
+version = "0.1.0"
 description = "Adaptive, attack-tested, eval-gated RAG platform"
 readme = "README.md"
 license = { text = "MIT" }
@@ -16,6 +16,8 @@ dependencies = [
   "rank-bm25>=0.2.2",
   "numpy>=2.1.0",
   "pyyaml>=6.0.0",
+  "opentelemetry-api>=1.27.0",
+  "opentelemetry-sdk>=1.27.0",
 ]
 
 [project.optional-dependencies]
@@ -28,6 +30,7 @@ dev = [
   "ruff>=0.8.0",
   "mypy>=1.13.0",
   "types-requests>=2.32.0",
+  "matplotlib>=3.9.0",
 ]
 
 [project.scripts]
@@ -63,7 +66,7 @@ module = ["tests.*"]
 disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]
-module = ["rank_bm25", "sentence_transformers", "sentence_transformers.*"]
+module = ["rank_bm25", "sentence_transformers", "sentence_transformers.*", "opentelemetry.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

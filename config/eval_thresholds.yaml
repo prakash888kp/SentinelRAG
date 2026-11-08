@@ -12,3 +12,8 @@ phase2_rag:
   mean_faithfulness_min: 0.55
   mean_relevance_min: 0.55
   judge_agreement_within_0_2_min: 0.60
+
+# Phase 5: CI asserts ingest defenses block poison probes (MockEmbedder ASR stays high).
+phase5_redteam:
+  reference_alpha: 0.5
+  defense_probe_blocked_fraction_min: 1.0

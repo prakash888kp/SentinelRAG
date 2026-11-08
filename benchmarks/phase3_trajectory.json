@@ -1,0 +1,18 @@
+{
+  "mean_trajectory_usefulness": 0.5,
+  "mean_trajectory_recall": 1.0,
+  "items": [
+    {
+      "id": "mh-01",
+      "trajectory_usefulness": 0.3333333333333333,
+      "trajectory_recall": 1.0,
+      "n_hops": 3
+    },
+    {
+      "id": "mh-02",
+      "trajectory_usefulness": 0.6666666666666666,
+      "trajectory_recall": 1.0,
+      "n_hops": 3
+    }
+  ]
+}

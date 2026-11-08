@@ -24,7 +24,10 @@ def main() -> int:
                 f"| mean_faithfulness | {report['mean_faithfulness']} |",
                 f"| mean_relevance | {report['mean_relevance']} |",
                 f"| mean_recall@k | {report['mean_recall_at_k']} |",
-                f"| judge agreement (within 0.2) | {report['judge_agreement']['within_0_2_rate']} |",
+                (
+                    "| judge agreement (within 0.2) | "
+                    f"{report['judge_agreement']['within_0_2_rate']} |"
+                ),
                 "",
             ]
         ),

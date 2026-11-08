@@ -67,6 +67,8 @@ class Settings(BaseSettings):
 
     cost_budget_usd: float = Field(default=0.01, ge=0.0)
     latency_budget_ms: int = Field(default=2000, ge=1)
+    agent_max_hops: int = Field(default=3, ge=1, le=8)
+    otel_enabled: bool = True
 
     @field_validator("chunk_overlap")
     @classmethod

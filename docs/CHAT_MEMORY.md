@@ -66,19 +66,12 @@ Adaptive, attack-tested, eval-gated RAG platform proving: ADAPTIVE (router/Paret
 | Phase | Status |
 |-------|--------|
 | 0 | Done — VM live, Compose up |
-| 1 | Done — ingest, naive/hybrid, `benchmarks/phase1_retrieval.json` |
-| 2 | **Done** — golden set, judges v1, `phase2_eval.json`, CI gate phase1+2 |
-| 3–6 | Planned — agentic retrieval next |
-
-## Phase status (detail)
-
-| Phase | Status |
-|-------|--------|
-| **0** Scaffold, MockLLM, `/health` `/query`, Compose, CI skeleton, ADR-001 | **COMPLETE locally** (tests green) |
-| 1 Ingest + retrieval | **Done** |
-| 2 Eval harness | **Done** — `/eval/run`, judge v1, agreement report |
-| 3 Agentic multi-hop | **Next** — say **continue** |
-| 2+ | NOT STARTED |
+| 1 | Done — `benchmarks/phase1_retrieval.json` |
+| 2 | Done — `phase2_eval.json`, `eval-gate` CI |
+| 3 | Done — agentic multi-hop, `phase3_trajectory.json`, OTel |
+| 4 | Done — router/policy, `pareto_points.json` |
+| 5 | Done — red-team harness, `asr_vs_alpha.json`, `redteam-gate`, ADR-002 |
+| 6 | Done — **v0.1.0**, README table, CHANGELOG, `scripts/demo.ps1` |
 
 ## What was built (Phase 0)
 
@@ -95,7 +88,7 @@ Adaptive, attack-tested, eval-gated RAG platform proving: ADAPTIVE (router/Paret
 ```
 ruff: pass
 mypy strict (src/sentinelrag): pass
-pytest: 11 passed, coverage ~95%
+pytest: 47 passed, coverage ~85%
 ```
 
 Docker daemon was not confirmed running during Phase 0; Compose verification deferred to Azure VM (or local Docker Desktop once up).
@@ -117,10 +110,10 @@ Docker daemon was not confirmed running during Phase 0; Compose verification def
 
 ## Next action
 
-**STOPPED — waiting for user `continue` for Phase 1.**
-
-Before Phase 1 (optional but recommended): finish Azure VM + `vm-bootstrap.sh` + `docker compose up` per RUNBOOK, then update this file with public IP.
+1. Pull `master` and watch CI (`ci`, `eval-gate`, `redteam-gate`) on GitHub.
+2. Optional: `uv run python scripts/azure_vm_deploy.py` after green CI to refresh VM.
+3. Rotate any secrets pasted in chat; keep `.env` out of git.
 
 ## Session log
 
-- 2026-11-08: Locked Azure-first; Phase 0 only; memory docs; portal confirmed with credits; computer-use Create VM partially reached Basics but size/RG actions blocked; Phase 0 repo + tests completed offline; no push.
+- 2026-11-08: Phases 0–2 shipped earlier; Phases 3–6 completed autonomously (agentic, Pareto, red-team, v0.1.0 polish), pushed to `master`, tag `v0.1.0`.

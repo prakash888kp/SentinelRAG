@@ -1,81 +1,90 @@
 # SentinelRAG
 
-Adaptive, attack-tested, eval-gated RAG. Phase 0 ships a runnable scaffold with MockLLM, FastAPI hello query, Qdrant Compose, and CI skeleton.
+[![CI](https://github.com/prakash888kp/SentinelRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/ci.yml)
+[![Eval gate](https://github.com/prakash888kp/SentinelRAG/actions/workflows/eval-gate.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/eval-gate.yml)
 
-> Results-first tables, Pareto/ASR plots, and published numbers arrive in later phases from reproducible benchmark files — **none are invented here.**
+Adaptive, attack-tested, **eval-gated** RAG (v0.1.0). CI uses **MockLLM** and **MockEmbedder**; real providers are configured via `.env` for VM/local runs.
+
+## Published results (from `benchmarks/*.json`, seed 42)
+
+| Metric | Naive | Hybrid | Agentic |
+|--------|-------|--------|---------|
+| Recall@5 (Phase 1) | 0.83 | **1.00** | — |
+| Mean faithfulness (Phase 2, mock judge) | — | **0.83** | — |
+| Trajectory recall (Phase 3 multi-hop) | — | — | **1.00** |
+| Est. cost / query (Phase 4 proxy) | $0.00005 | $0.00020 | $0.00120 |
+
+| Red team @ α=0.5 | Value |
+|------------------|-------|
+| Mean retrieval ASR (mock embedder; documents vulnerability) | 1.00 |
+| Defense probe blocked fraction (ingest filters) | **1.00** |
+
+Regenerate locally: `uv run python benchmarks/run_*.py` then `uv run python scripts/check_eval_gate.py`.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  Q[Query] --> R[Router<br/>complexity + budget]
+  R --> N[Naive BM25]
+  R --> H[Hybrid + rerank]
+  R --> A[Agentic multi-hop]
+  N & H & A --> G[LLM generation]
+  G --> O[OTel spans + cost]
+  I[Ingest + defenses] --> V[(Qdrant / memory)]
+  V --> N & H & A
+  E[Eval / red-team gates] --> CI[GitHub Actions]
+```
 
 ## Quickstart
 
 ```bash
-# install
 uv sync --extra dev
-
-# unit tests (offline, MockLLM)
 uv run pytest
 
-# one-command stack (Qdrant + API)
 docker compose up --build -d
 curl -s http://127.0.0.1:8000/health
-curl -s -X POST http://127.0.0.1:8000/query -H "Content-Type: application/json" \
-  -d '{"query":"What is SentinelRAG?"}'
 ```
 
-Demo without Docker API image (API on host, Qdrant in Compose):
+Windows one-shot demo: `powershell -File scripts/demo.ps1`
+
+Query strategies: `naive`, `hybrid`, `agentic`, or `auto` (router):
 
 ```bash
-docker compose up -d qdrant
-uv run uvicorn sentinelrag.api.app:app --host 127.0.0.1 --port 8000
+curl -s -X POST http://127.0.0.1:8000/query -H "Content-Type: application/json" \
+  -d '{"query":"How does eval gating work?", "strategy":"auto"}'
 ```
 
 ## Azure-first hosting
 
-Primary host is a stop/start Ubuntu VM + Docker Compose. See:
+Primary host: stop/start Ubuntu VM + Docker Compose. See `docs/CHAT_MEMORY.md`, `docs/azure/RUNBOOK.md`, `scripts/azure_vm_deploy.py`.
 
-- `docs/CHAT_MEMORY.md` — durable decisions & Azure names
-- `docs/adr/001-stack.md` — stack + hosting trade-offs
-- `docs/azure/RUNBOOK.md` — how to finish VM create / deallocate
-- `docs/azure/vm-bootstrap.sh` — Docker install on the VM
+## Phase map
+
+| Phase | Deliverable |
+|-------|----------------|
+| 0 | Scaffold, MockLLM, `/health`, Compose, CI |
+| 1 | Mini corpus, hybrid retrieval, `phase1_retrieval.json` |
+| 2 | Golden set, LLM judges, `eval-gate` workflow |
+| 3 | Agentic multi-hop, trajectory metrics, tracing |
+| 4 | Router + Pareto quality/cost/latency |
+| 5 | Red-team harness, defenses, `redteam-gate`, ADR-002 |
+| 6 | v0.1.0 release, CHANGELOG, demo script |
 
 ## Layout
 
 ```
 src/sentinelrag/
   ingest/ retrieval/ router/ generation/ eval/ redteam/ observability/ api/
-benchmarks/ docs/adr/ docs/azure/ .github/workflows/
+benchmarks/ config/ docs/adr/ .github/workflows/
 ```
 
-## Phase 1 — mini corpus retrieval
+## Docs
 
-- `data/mini_corpus/` — owned markdown docs; `data/mini_qrels.json` holds golden queries.
-- Ingest: loaders, Pydantic metadata, fixed / semantic / contextual chunkers, no-op poisoning filter.
-- Retrieval: MockEmbedder (CI), optional `sentence-transformers` via `uv sync --extra ml`, BM25, hybrid min-max fusion, MockReranker, in-memory and Qdrant stores.
-- API: `POST /ingest` (corpus path or inline body), `POST /query?strategy=naive|hybrid`.
-- Benchmark (generates real numbers locally):
+- `docs/adr/001-stack.md` — stack and hosting
+- `docs/adr/002-security.md` — poisoning attacks and defenses
+- `CHANGELOG.md` — release notes
 
-```bash
-uv run python benchmarks/run_phase1_retrieval.py
-# writes benchmarks/phase1_retrieval.json and benchmarks/phase1_retrieval.md
-```
+## License
 
-Settings knobs include `SENTINELRAG_RETRIEVAL_TOP_K`, `SENTINELRAG_HYBRID_ALPHA`, `SENTINELRAG_CHUNK_SIZE`, and `SENTINELRAG_EMBEDDING_MODEL` (default `mock-embedder`).
-
-## Phase status
-
-| Phase | Status |
-|-------|--------|
-| 0 Scaffold + hello query | **Done locally** — Azure VM pending human finish |
-| 1 Mini corpus + hybrid retrieval | **Done** — `benchmarks/phase1_retrieval.json` |
-| 2 Golden set + LLM judge + CI gate | **Done** — `benchmarks/phase2_eval.json`, `POST /eval/run` |
-| 3+ | Agentic retrieval, router, red team (planned) |
-
-## Phase 2 — eval harness
-
-- `data/golden_dataset.json` — seeded single/multi-hop items (`scripts/generate_golden_dataset.py`).
-- Versioned judges under `src/sentinelrag/eval/judges/v1/`.
-- `data/judge_calibration.json` — human labels for agreement reporting (MockJudge in CI).
-- CI: `eval-gate` runs Phase 1 + Phase 2 and enforces `config/eval_thresholds.yaml`.
-
-```bash
-uv run python benchmarks/run_phase2_eval.py
-uv run python scripts/check_eval_gate.py
-```
+MIT

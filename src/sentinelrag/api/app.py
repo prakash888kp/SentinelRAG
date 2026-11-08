@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import FastAPI, Query
 from pydantic import BaseModel, Field
@@ -13,10 +13,15 @@ from sentinelrag.eval.phase2_rag import run_phase2_eval
 from sentinelrag.generation.llm import Message, get_llm
 from sentinelrag.ingest.pipeline import IndexState, ingest_corpus_dir, ingest_document_body
 from sentinelrag.paths import mini_corpus_dir
+from sentinelrag.retrieval.agentic import AgenticMultiHopRetriever
 from sentinelrag.retrieval.embeddings import build_embedder
 from sentinelrag.retrieval.reranker import build_reranker
+from sentinelrag.retrieval.stores import ScoredChunk
 from sentinelrag.retrieval.strategies import HybridRerankRetriever, NaiveRetriever, StrategyName
+from sentinelrag.router.policy import route_query
 from sentinelrag.settings import Settings, get_settings, settings_without_dotenv
+
+ApiStrategy = StrategyName | Literal["agentic", "auto"]
 
 HELLO_PASSAGE = {
     "doc_id": "doc-hello-001",
@@ -124,7 +129,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/query", response_model=QueryResponse)
     def query_post(
         body: QueryRequest,
-        strategy: Annotated[StrategyName, Query()] = "hybrid",
+        strategy: Annotated[ApiStrategy, Query()] = "hybrid",
     ) -> QueryResponse:
         current = app.state.settings
         assert isinstance(current, Settings)
@@ -152,16 +157,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 provider=llm.name,
             )
 
+        resolved = strategy
+        if strategy == "auto":
+            resolved = route_query(body.query, current).strategy
+
         embedder = state.embedder or build_embedder(
             current.embedding_model,
             dim=current.embed_dim,
             seed=current.benchmark_seed,
         )
-        retriever: NaiveRetriever | HybridRerankRetriever
-        if strategy == "naive":
-            retriever = NaiveRetriever(state.store, embedder)
-        else:
-            retriever = HybridRerankRetriever(
+        hits: list[ScoredChunk]
+        if resolved == "naive":
+            hits = NaiveRetriever(state.store, embedder).retrieve(
+                body.query, top_k=current.retrieval_top_k
+            )
+        elif resolved == "agentic":
+            hybrid = HybridRerankRetriever(
                 state.store,
                 state.bm25,
                 embedder,
@@ -169,7 +180,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 alpha=current.hybrid_alpha,
                 chunks_by_id=state.chunks,
             )
-        hits = retriever.retrieve(body.query, top_k=current.retrieval_top_k)
+            agent = AgenticMultiHopRetriever(hybrid, max_hops=current.agent_max_hops)
+            hits = agent.retrieve(body.query, top_k=current.retrieval_top_k).chunks
+            resolved = "agentic"
+        else:
+            hits = HybridRerankRetriever(
+                state.store,
+                state.bm25,
+                embedder,
+                build_reranker(current.reranker_model),
+                alpha=current.hybrid_alpha,
+                chunks_by_id=state.chunks,
+            ).retrieve(body.query, top_k=current.retrieval_top_k)
+            resolved = "hybrid"
         context = "\n\n".join(h.text for h in hits) if hits else HELLO_PASSAGE["text"]
         prompt = f"Context:\n{context}\n\nQuestion: {body.query}\n\nAnswer using only the context."
         answer = llm.complete([Message(role="user", content=prompt)])
@@ -187,7 +210,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return QueryResponse(
             answer=answer,
             citations=citations,
-            strategy=strategy,
+            strategy=resolved,
             provider=llm.name,
         )
 
