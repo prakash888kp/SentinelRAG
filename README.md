@@ -44,9 +44,25 @@ src/sentinelrag/
 benchmarks/ docs/adr/ docs/azure/ .github/workflows/
 ```
 
+## Phase 1 — mini corpus retrieval
+
+- `data/mini_corpus/` — owned markdown docs; `data/mini_qrels.json` holds golden queries.
+- Ingest: loaders, Pydantic metadata, fixed / semantic / contextual chunkers, no-op poisoning filter.
+- Retrieval: MockEmbedder (CI), optional `sentence-transformers` via `uv sync --extra ml`, BM25, hybrid min-max fusion, MockReranker, in-memory and Qdrant stores.
+- API: `POST /ingest` (corpus path or inline body), `POST /query?strategy=naive|hybrid`.
+- Benchmark (generates real numbers locally):
+
+```bash
+uv run python benchmarks/run_phase1_retrieval.py
+# writes benchmarks/phase1_retrieval.json and benchmarks/phase1_retrieval.md
+```
+
+Settings knobs include `SENTINELRAG_RETRIEVAL_TOP_K`, `SENTINELRAG_HYBRID_ALPHA`, `SENTINELRAG_CHUNK_SIZE`, and `SENTINELRAG_EMBEDDING_MODEL` (default `mock-embedder`).
+
 ## Phase status
 
 | Phase | Status |
 |-------|--------|
 | 0 Scaffold + hello query | **Done locally** — Azure VM pending human finish |
-| 1+ | Waiting for user **continue** |
+| 1 Mini corpus + hybrid retrieval | **Done** — CI uses mock embedder; optional real embedder via `ml` extra |
+| 2+ | Eval gates, router, red team (planned) |

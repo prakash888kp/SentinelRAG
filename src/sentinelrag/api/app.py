@@ -1,15 +1,22 @@
-"""FastAPI entrypoint: /health and Phase-0 hello /query."""
+"""FastAPI entrypoint: health, ingest, and retrieval-backed query."""
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from pathlib import Path
+from typing import Annotated
+
+from fastapi import FastAPI, Query
 from pydantic import BaseModel, Field
 
 from sentinelrag import __version__
 from sentinelrag.generation.llm import Message, get_llm
+from sentinelrag.ingest.pipeline import IndexState, ingest_corpus_dir, ingest_document_body
+from sentinelrag.paths import mini_corpus_dir
+from sentinelrag.retrieval.embeddings import build_embedder
+from sentinelrag.retrieval.reranker import build_reranker
+from sentinelrag.retrieval.strategies import HybridRerankRetriever, NaiveRetriever, StrategyName
 from sentinelrag.settings import Settings, get_settings
 
-# Fixed in-memory passage for Phase 0 grounded stub (no Qdrant required for hello path).
 HELLO_PASSAGE = {
     "doc_id": "doc-hello-001",
     "chunk_id": "chunk-hello-001",
@@ -25,6 +32,22 @@ class HealthResponse(BaseModel):
     version: str
     env: str
     llm_provider: str
+    index_ready: bool
+
+
+class IngestRequest(BaseModel):
+    corpus_path: str | None = Field(
+        default=None,
+        description="Filesystem path to a markdown corpus directory",
+    )
+    doc_id: str | None = None
+    title: str | None = None
+    text: str | None = None
+
+
+class IngestResponse(BaseModel):
+    chunks_indexed: int
+    corpus_path: str | None = None
 
 
 class QueryRequest(BaseModel):
@@ -48,39 +71,114 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     cfg = settings or get_settings()
     app = FastAPI(title=cfg.app_name, version=__version__)
     app.state.settings = cfg
+    app.state.index = IndexState()
+
+    def _maybe_bootstrap_index(current: Settings) -> None:
+        state: IndexState = app.state.index
+        if state.is_ready():
+            return
+        path = mini_corpus_dir()
+        if path.is_dir():
+            ingest_corpus_dir(path, state, settings=current)
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:
         current = app.state.settings
         assert isinstance(current, Settings)
+        state: IndexState = app.state.index
         return HealthResponse(
             status="ok",
             version=__version__,
             env=current.env,
             llm_provider=current.llm_provider,
+            index_ready=state.is_ready(),
         )
 
-    @app.post("/query", response_model=QueryResponse)
-    def query(body: QueryRequest) -> QueryResponse:
+    @app.post("/ingest", response_model=IngestResponse)
+    def ingest(body: IngestRequest) -> IngestResponse:
         current = app.state.settings
         assert isinstance(current, Settings)
+        state: IndexState = app.state.index
+        if body.text and body.doc_id:
+            count = ingest_document_body(
+                doc_id=body.doc_id,
+                title=body.title or body.doc_id,
+                text=body.text,
+                state=state,
+                settings=current,
+            )
+            return IngestResponse(chunks_indexed=count, corpus_path=None)
+        corpus = Path(body.corpus_path) if body.corpus_path else mini_corpus_dir()
+        count = ingest_corpus_dir(corpus, state, settings=current)
+        return IngestResponse(chunks_indexed=count, corpus_path=str(corpus))
+
+    @app.post("/query", response_model=QueryResponse)
+    def query_post(
+        body: QueryRequest,
+        strategy: Annotated[StrategyName, Query()] = "hybrid",
+    ) -> QueryResponse:
+        current = app.state.settings
+        assert isinstance(current, Settings)
+        _maybe_bootstrap_index(current)
+        state: IndexState = app.state.index
         llm = get_llm(current)
-        prompt = (
-            f"Context: {HELLO_PASSAGE['text']}\n\n"
-            f"Question: {body.query}\n\n"
-            "Answer using only the context."
+
+        if not state.is_ready() or state.store is None or state.embedder is None:
+            prompt = (
+                f"Context: {HELLO_PASSAGE['text']}\n\n"
+                f"Question: {body.query}\n\n"
+                "Answer using only the context."
+            )
+            answer = llm.complete([Message(role="user", content=prompt)])
+            return QueryResponse(
+                answer=answer,
+                citations=[
+                    Citation(
+                        doc_id=HELLO_PASSAGE["doc_id"],
+                        chunk_id=HELLO_PASSAGE["chunk_id"],
+                        snippet=HELLO_PASSAGE["text"][:160],
+                    )
+                ],
+                strategy="hello_stub",
+                provider=llm.name,
+            )
+
+        embedder = state.embedder or build_embedder(
+            current.embedding_model,
+            dim=current.embed_dim,
+            seed=current.benchmark_seed,
         )
+        retriever: NaiveRetriever | HybridRerankRetriever
+        if strategy == "naive":
+            retriever = NaiveRetriever(state.store, embedder)
+        else:
+            retriever = HybridRerankRetriever(
+                state.store,
+                state.bm25,
+                embedder,
+                build_reranker(current.reranker_model),
+                alpha=current.hybrid_alpha,
+                chunks_by_id=state.chunks,
+            )
+        hits = retriever.retrieve(body.query, top_k=current.retrieval_top_k)
+        context = "\n\n".join(h.text for h in hits) if hits else HELLO_PASSAGE["text"]
+        prompt = f"Context:\n{context}\n\nQuestion: {body.query}\n\nAnswer using only the context."
         answer = llm.complete([Message(role="user", content=prompt)])
-        return QueryResponse(
-            answer=answer,
-            citations=[
+        citations = [
+            Citation(doc_id=h.doc_id, chunk_id=h.chunk_id, snippet=h.text[:160]) for h in hits
+        ]
+        if not citations:
+            citations = [
                 Citation(
                     doc_id=HELLO_PASSAGE["doc_id"],
                     chunk_id=HELLO_PASSAGE["chunk_id"],
                     snippet=HELLO_PASSAGE["text"][:160],
                 )
-            ],
-            strategy="hello_stub",
+            ]
+        return QueryResponse(
+            answer=answer,
+            citations=citations,
+            strategy=strategy,
             provider=llm.name,
         )
 

@@ -1,0 +1,8 @@
+# CI eval gate thresholds (Phase 2). Regressions fail the workflow.
+phase1_retrieval:
+  hybrid:
+    recall_at_k_min: 0.80
+    mrr_min: 0.40
+  naive:
+    recall_at_k_min: 0.50
+    mrr_min: 0.20

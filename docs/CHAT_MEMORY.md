@@ -19,7 +19,7 @@ Adaptive, attack-tested, eval-gated RAG platform proving: ADAPTIVE (router/Paret
 | LLM in CI | **MockLLM** deterministic; real providers sketched only |
 | Phase 1 published table | Real embedder on VM/local run; CI stays Mock embedder |
 | Phase 1 corpus | Authored mini-corpus; public dataset in Phase 2 |
-| Git | Small conventional commits locally; **do not push** until user says ready |
+| Git | **Private GitHub** https://github.com/prakash888kp/SentinelRAG (`master`) |
 | Runtime config | `.env` (gitignored) production-style models; secrets filled when user pastes |
 | Compose | `env_file: .env`; forces `SENTINELRAG_QDRANT_URL=http://qdrant:6333` |
 | License | MIT |

@@ -1,0 +1,36 @@
+{
+  "seed": 42,
+  "corpus_version": "mini_corpus_v1",
+  "queries": [
+    {
+      "id": "q1",
+      "query": "What is SentinelRAG?",
+      "relevant_chunk_ids": ["01-overview::0"]
+    },
+    {
+      "id": "q2",
+      "query": "What does Phase 1 add to the platform?",
+      "relevant_chunk_ids": ["01-overview::0"]
+    },
+    {
+      "id": "q3",
+      "query": "Which chunking strategies are supported?",
+      "relevant_chunk_ids": ["02-ingest::0"]
+    },
+    {
+      "id": "q4",
+      "query": "How does hybrid retrieval combine BM25 and dense search?",
+      "relevant_chunk_ids": ["03-retrieval::0"]
+    },
+    {
+      "id": "q5",
+      "query": "What evaluation gates does CI use?",
+      "relevant_chunk_ids": ["04-eval::0"]
+    },
+    {
+      "id": "q6",
+      "query": "How does the system defend against corpus poisoning?",
+      "relevant_chunk_ids": ["05-security::0"]
+    }
+  ]
+}
