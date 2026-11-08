@@ -5,11 +5,15 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
+
+import httpx
 
 from sentinelrag.settings import Settings, get_settings
 
-ProviderName = Literal["mock", "openai", "anthropic", "bedrock"]
+ProviderName = Literal[
+    "mock", "openai", "anthropic", "bedrock", "gemini", "azure_openai"
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,13 +50,108 @@ class MockLLM(LLMProvider):
         )
 
 
+class GeminiProvider(LLMProvider):
+    """Google Gemini via Generative Language API (httpx; no extra SDK)."""
+
+    name: ProviderName = "gemini"
+
+    def __init__(self, model: str, api_key: str) -> None:
+        if not api_key.strip():
+            msg = "GEMINI_API_KEY is required when SENTINELRAG_LLM_PROVIDER=gemini"
+            raise ValueError(msg)
+        self.model = model
+        self._api_key = api_key
+
+    def complete(self, messages: Sequence[Message], *, temperature: float = 0.0) -> str:
+        system_parts: list[str] = []
+        contents: list[dict[str, Any]] = []
+        for message in messages:
+            if message.role == "system":
+                system_parts.append(message.content)
+            elif message.role == "user":
+                contents.append({"role": "user", "parts": [{"text": message.content}]})
+            else:
+                contents.append({"role": "model", "parts": [{"text": message.content}]})
+        if not contents:
+            contents = [{"role": "user", "parts": [{"text": ""}]}]
+
+        body: dict[str, Any] = {
+            "contents": contents,
+            "generationConfig": {"temperature": temperature},
+        }
+        if system_parts:
+            body["systemInstruction"] = {"parts": [{"text": "\n".join(system_parts)}]}
+
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models"
+            f"/{self.model}:generateContent"
+        )
+        with httpx.Client(timeout=90.0) as client:
+            response = client.post(url, params={"key": self._api_key}, json=body)
+            response.raise_for_status()
+            payload = response.json()
+
+        try:
+            return str(payload["candidates"][0]["content"]["parts"][0]["text"])
+        except (KeyError, IndexError, TypeError) as exc:
+            msg = f"Unexpected Gemini response shape: {payload!r}"
+            raise RuntimeError(msg) from exc
+
+
 class OpenAIProvider(LLMProvider):
-    """Sketch only — not called in Phase 0 / CI."""
+    """Sketch only — wire in a later phase unless OPENAI_API_KEY is set."""
 
     name: ProviderName = "openai"
 
     def complete(self, messages: Sequence[Message], *, temperature: float = 0.0) -> str:
-        raise NotImplementedError("OpenAI client lands in a later phase; use MockLLM in CI.")
+        raise NotImplementedError("OpenAI client lands in a later phase; use gemini or MockLLM.")
+
+
+class AzureOpenAIProvider(LLMProvider):
+    """Azure OpenAI — requires endpoint, deployment, and key in settings."""
+
+    name: ProviderName = "azure_openai"
+
+    def __init__(self, settings: Settings) -> None:
+        missing = [
+            name
+            for name, val in (
+                ("AZURE_OPENAI_API_KEY", settings.azure_openai_api_key),
+                ("AZURE_OPENAI_ENDPOINT", settings.azure_openai_endpoint),
+                ("AZURE_OPENAI_DEPLOYMENT", settings.azure_openai_deployment),
+            )
+            if not (val and str(val).strip())
+        ]
+        if missing:
+            msg = f"Missing Azure OpenAI settings: {', '.join(missing)}"
+            raise ValueError(msg)
+        self._settings = settings
+
+    def complete(self, messages: Sequence[Message], *, temperature: float = 0.0) -> str:
+        endpoint = str(self._settings.azure_openai_endpoint).rstrip("/")
+        deployment = str(self._settings.azure_openai_deployment)
+        url = (
+            f"{endpoint}/openai/deployments/{deployment}/chat/completions"
+            f"?api-version={self._settings.azure_openai_api_version}"
+        )
+        oai_messages = [{"role": m.role, "content": m.content} for m in messages]
+        body = {
+            "messages": oai_messages,
+            "temperature": temperature,
+        }
+        headers = {
+            "api-key": str(self._settings.azure_openai_api_key),
+            "Content-Type": "application/json",
+        }
+        with httpx.Client(timeout=90.0) as client:
+            response = client.post(url, headers=headers, json=body)
+            response.raise_for_status()
+            payload = response.json()
+        try:
+            return str(payload["choices"][0]["message"]["content"])
+        except (KeyError, IndexError, TypeError) as exc:
+            msg = f"Unexpected Azure OpenAI response: {payload!r}"
+            raise RuntimeError(msg) from exc
 
 
 class AnthropicProvider(LLMProvider):
@@ -74,10 +173,14 @@ class BedrockProvider(LLMProvider):
 
 
 def get_llm(settings: Settings | None = None) -> LLMProvider:
-    """Factory: Phase 0 defaults to MockLLM; other providers are sketched."""
+    """Factory for generation backends."""
     cfg = settings or get_settings()
     if cfg.llm_provider == "mock":
         return MockLLM(model=cfg.llm_model)
+    if cfg.llm_provider == "gemini":
+        return GeminiProvider(model=cfg.llm_model, api_key=cfg.gemini_api_key or "")
+    if cfg.llm_provider == "azure_openai":
+        return AzureOpenAIProvider(cfg)
     if cfg.llm_provider == "openai":
         return OpenAIProvider()
     if cfg.llm_provider == "anthropic":

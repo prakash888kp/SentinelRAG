@@ -20,6 +20,8 @@ Adaptive, attack-tested, eval-gated RAG platform proving: ADAPTIVE (router/Paret
 | Phase 1 published table | Real embedder on VM/local run; CI stays Mock embedder |
 | Phase 1 corpus | Authored mini-corpus; public dataset in Phase 2 |
 | Git | Small conventional commits locally; **do not push** until user says ready |
+| Runtime config | `.env` (gitignored) production-style models; secrets filled when user pastes |
+| Compose | `env_file: .env`; forces `SENTINELRAG_QDRANT_URL=http://qdrant:6333` |
 | License | MIT |
 
 ## Azure topology (target)
@@ -40,7 +42,9 @@ Adaptive, attack-tested, eval-gated RAG platform proving: ADAPTIVE (router/Paret
 | Resource group | `rg-sentinelrag` | **Not created yet** — finish in portal |
 | Region | Prefer Central/South India; East US tried | D2s_v3 unavailable in eastus for this sub |
 | VM name | `vm-sentinelrag` | Target Ubuntu 24.04, B2s-class |
-| Public IP | — | Fill when Running |
+| Public IP | `20.83.171.151` | vm-sentinelrag; SSH password auth |
+| LLM (runtime) | **Gemini** `gemini-2.0-flash` via `GEMINI_API_KEY` | Azure OpenAI fields still empty |
+| Deploy | `scripts/azure_vm_deploy.py` | Docker + Compose up on VM |
 | NSG | SSH 22 inbound | Restrict later if possible |
 | SSH user | `azureuser` | Typical portal default |
 | SSH private key path | `C:\Users\praka\.ssh\sentinelrag_azure` (outside git) | Never commit |
