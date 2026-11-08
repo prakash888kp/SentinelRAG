@@ -62,7 +62,7 @@ Homepage = "https://github.com/prakash888kp/SentinelRAG"
 Repository = "https://github.com/prakash888kp/SentinelRAG"
 Issues = "https://github.com/prakash888kp/SentinelRAG/issues"
 Documentation = "https://github.com/prakash888kp/SentinelRAG#readme"
-Changelog = "https://github.com/prakash888kp/SentinelRAG/blob/master/CHANGELOG.md"
+Changelog = "https://github.com/prakash888kp/SentinelRAG/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 ml = [
