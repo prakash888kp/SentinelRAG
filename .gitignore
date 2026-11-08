@@ -1,0 +1,39 @@
+# Secrets & local env
+.env
+.env.*
+!.env.example
+
+# SSH / keys (never commit)
+*.pem
+*.ppk
+id_rsa*
+id_ed25519*
+sentinelrag_azure*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Benchmarks / local data (keep committed JSON results when intentional)
+*.log
+data/raw/
+.qdrant/
