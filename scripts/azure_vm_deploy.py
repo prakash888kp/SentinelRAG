@@ -73,7 +73,10 @@ def main() -> int:
         bootstrap_lf = bootstrap.read_bytes().replace(b"\r\n", b"\n")
         with sftp.open("/home/" + user + "/vm-bootstrap.sh", "wb") as remote_boot:
             remote_boot.write(bootstrap_lf)
-        run_ssh(client, "chmod +x ~/vm-bootstrap.sh && bash ~/vm-bootstrap.sh", timeout=1200)
+        try:
+            run_ssh(client, "docker compose version", timeout=60)
+        except RuntimeError:
+            run_ssh(client, "chmod +x ~/vm-bootstrap.sh && bash ~/vm-bootstrap.sh", timeout=1200)
 
         remote_base = f"/home/{user}/sentinelrag"
         run_ssh(client, f"mkdir -p {remote_base}")
