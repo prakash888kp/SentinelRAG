@@ -24,3 +24,5 @@ jobs:
         env:
           SENTINELRAG_ENV: ci
           SENTINELRAG_LLM_PROVIDER: mock
+      - name: Secret scan (tracked files)
+        run: uv run python scripts/verify_repo_secrets.py

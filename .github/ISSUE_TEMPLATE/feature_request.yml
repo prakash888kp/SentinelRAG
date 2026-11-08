@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose an enhancement aligned with eval-gated RAG
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What pain does this solve for RAG builders?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+    validations:
+      required: true
+  - type: checkboxes
+    id: gates
+    attributes:
+      label: Eval / security impact
+      options:
+        - label: Needs new or updated benchmark JSON
+        - label: Needs eval-gate or redteam-gate threshold change
+        - label: No gate impact (docs-only)

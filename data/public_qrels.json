@@ -1,0 +1,66 @@
+{
+  "seed": 42,
+  "corpus_version": "public_corpus_v1",
+  "queries": [
+    {
+      "id": "pq1",
+      "query": "triple-gate RAG retrieval faithfulness poison defense CI",
+      "relevant_chunk_ids": ["pc-01-triple-gate::0"]
+    },
+    {
+      "id": "pq2",
+      "query": "hybrid retrieval min-max BM25 dense fusion alpha",
+      "relevant_chunk_ids": ["pc-02-hybrid-fusion::0"]
+    },
+    {
+      "id": "pq3",
+      "query": "BM25Okapi sparse keyword overlap",
+      "relevant_chunk_ids": ["pc-03-bm25-sparse::0"]
+    },
+    {
+      "id": "pq4",
+      "query": "dense embedding paraphrase retrieval",
+      "relevant_chunk_ids": ["pc-04-dense-vectors::0"]
+    },
+    {
+      "id": "pq5",
+      "query": "agentic multi-hop follow-up sub-queries",
+      "relevant_chunk_ids": ["pc-08-agentic-hop::0"]
+    },
+    {
+      "id": "pq6",
+      "query": "adaptive router naive hybrid agentic cost budget",
+      "relevant_chunk_ids": ["pc-09-router::0"]
+    },
+    {
+      "id": "pq7",
+      "query": "LLM judge faithfulness relevance versioned prompt",
+      "relevant_chunk_ids": ["pc-10-judge::0"]
+    },
+    {
+      "id": "pq8",
+      "query": "metadata-only poisoning trust scores ingest",
+      "relevant_chunk_ids": ["pc-12-poison-meta::0"]
+    },
+    {
+      "id": "pq9",
+      "query": "lexical anomaly ignore-all-other-docs ingest filter",
+      "relevant_chunk_ids": ["pc-13-lexical-defense::0"]
+    },
+    {
+      "id": "pq10",
+      "query": "Mock embedder MockLLM offline GitHub Actions",
+      "relevant_chunk_ids": ["pc-16-mock-ci::0"]
+    },
+    {
+      "id": "pq11",
+      "query": "Pareto quality cost latency strategies",
+      "relevant_chunk_ids": ["pc-17-pareto::0"]
+    },
+    {
+      "id": "pq12",
+      "query": "YAML eval gate thresholds benchmark JSON",
+      "relevant_chunk_ids": ["pc-20-eval-gate::0"]
+    }
+  ]
+}

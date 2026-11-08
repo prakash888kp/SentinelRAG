@@ -1,11 +1,31 @@
 [project]
 name = "sentinelrag"
 version = "0.1.0"
-description = "Adaptive, attack-tested, eval-gated RAG platform"
+description = "Triple-gate adaptive RAG: CI gates for retrieval, answer quality, and ingest poison defenses"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
-authors = [{ name = "SentinelRAG contributors" }]
+authors = [{ name = "PRAKASH KUMAR K", email = "prakash888kp@users.noreply.github.com" }]
+keywords = [
+  "rag",
+  "retrieval-augmented-generation",
+  "evaluation",
+  "ci",
+  "red-team",
+  "security",
+  "qdrant",
+  "fastapi",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Security",
+]
 dependencies = [
   "fastapi>=0.115.0",
   "uvicorn[standard]>=0.32.0",
@@ -19,6 +39,13 @@ dependencies = [
   "opentelemetry-api>=1.27.0",
   "opentelemetry-sdk>=1.27.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/prakash888kp/SentinelRAG"
+Repository = "https://github.com/prakash888kp/SentinelRAG"
+Issues = "https://github.com/prakash888kp/SentinelRAG/issues"
+Documentation = "https://github.com/prakash888kp/SentinelRAG#readme"
+Changelog = "https://github.com/prakash888kp/SentinelRAG/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
 ml = [

@@ -21,7 +21,10 @@ def main() -> int:
 
     path = root / "benchmarks" / "asr_vs_alpha.json"
     if not path.is_file():
-        print("Missing benchmarks/asr_vs_alpha.json — run benchmarks/run_redteam_sweep.py", file=sys.stderr)
+        print(
+            "Missing benchmarks/asr_vs_alpha.json — run benchmarks/run_redteam_sweep.py",
+            file=sys.stderr,
+        )
         return 1
 
     alpha_ref = float(phase5.get("reference_alpha", 0.5))

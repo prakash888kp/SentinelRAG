@@ -2,6 +2,14 @@
 
 All notable changes to SentinelRAG are documented here.
 
+## [Unreleased]
+
+### Added
+
+- OSS launch pack: CONTRIBUTING, SECURITY, CoC, issue templates, public corpus benchmark.
+- `scripts/verify_repo_secrets.py` and CI secret scan step.
+- PyPI-oriented metadata (`docs/PUBLISHING.md`); package not yet published.
+
 ## [0.1.0] — 2026-11-08
 
 ### Added

@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-11-08T09:00:39.652455+00:00",
+  "embedding_model": "mock-embedder",
+  "reranker_model": "mock-reranker",
+  "corpus_hash": "04c6e8d3e76c07fa",
+  "seed": 42,
+  "retrieval_top_k": 5,
+  "hybrid_alpha": 0.5,
+  "results": [
+    {
+      "strategy": "naive",
+      "recall_at_k": 0.25,
+      "mrr": 0.09999999999999999
+    },
+    {
+      "strategy": "hybrid",
+      "recall_at_k": 1.0,
+      "mrr": 1.0
+    }
+  ]
+}

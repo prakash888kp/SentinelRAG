@@ -18,6 +18,15 @@ def mini_qrels_path() -> Path:
     return project_root() / "data" / "mini_qrels.json"
 
 
+def public_corpus_dir() -> Path:
+    """OSS sample corpus (MIT-licensed originals in-repo)."""
+    return project_root() / "data" / "public_corpus"
+
+
+def public_qrels_path() -> Path:
+    return project_root() / "data" / "public_qrels.json"
+
+
 def golden_dataset_path() -> Path:
     return project_root() / "data" / "golden_dataset.json"
 

@@ -44,10 +44,12 @@ def run_benchmark(
     *,
     settings: Settings | None = None,
     strategies: tuple[StrategyName, ...] = ("naive", "hybrid"),
+    corpus_dir: Path | None = None,
+    qrels_path: Path | None = None,
 ) -> dict[str, Any]:
     cfg = settings if settings is not None else _default_benchmark_settings()
-    corpus_dir = mini_corpus_dir()
-    qrels_path = mini_qrels_path()
+    corpus_dir = corpus_dir if corpus_dir is not None else mini_corpus_dir()
+    qrels_path = qrels_path if qrels_path is not None else mini_qrels_path()
     seed, qrels = load_qrels(qrels_path)
 
     state = IndexState()

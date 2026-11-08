@@ -2,89 +2,138 @@
 
 [![CI](https://github.com/prakash888kp/SentinelRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/ci.yml)
 [![Eval gate](https://github.com/prakash888kp/SentinelRAG/actions/workflows/eval-gate.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/eval-gate.yml)
+[![Red team gate](https://github.com/prakash888kp/SentinelRAG/actions/workflows/redteam-gate.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/redteam-gate.yml)
 
-Adaptive, attack-tested, **eval-gated** RAG (v0.1.0). CI uses **MockLLM** and **MockEmbedder**; real providers are configured via `.env` for VM/local runs.
+**Triple-gate adaptive RAG** — fail CI on **retrieval**, **answer quality**, or **ingest-time poison
+defenses**, with naive / hybrid / agentic routing in one forkable service.
 
-## Published results (from `benchmarks/*.json`, seed 42)
+> Most RAG repos help you *build*. SentinelRAG helps you **not ship regressions** — including
+> poisoning bypasses — while still routing by cost and complexity.
 
-| Metric | Naive | Hybrid | Agentic |
-|--------|-------|--------|---------|
-| Recall@5 (Phase 1) | 0.83 | **1.00** | — |
-| Mean faithfulness (Phase 2, mock judge) | — | **0.83** | — |
-| Trajectory recall (Phase 3 multi-hop) | — | — | **1.00** |
-| Est. cost / query (Phase 4 proxy) | $0.00005 | $0.00020 | $0.00120 |
+**Author:** PRAKASH KUMAR K ([@prakash888kp](https://github.com/prakash888kp)) · **Support:** [GitHub Issues](https://github.com/prakash888kp/SentinelRAG/issues) only
 
-| Red team @ α=0.5 | Value |
-|------------------|-------|
-| Mean retrieval ASR (mock embedder; documents vulnerability) | 1.00 |
-| Defense probe blocked fraction (ingest filters) | **1.00** |
+---
 
-Regenerate locally: `uv run python benchmarks/run_*.py` then `uv run python scripts/check_eval_gate.py`.
+## Why this exists
 
-## Architecture
+| Gate | What breaks the build |
+|------|------------------------|
+| **Retrieval** | Hybrid recall@k / MRR below thresholds (`eval-gate`) |
+| **Generation** | Faithfulness / relevance judge regressions (`eval-gate`) |
+| **Security** | Ingest poison-defense probes fail (`redteam-gate`) |
+
+Eval-only tools (RAGAS, rag-ci, raggate) focus on metrics. Frameworks (LangChain, LlamaIndex) focus
+on glue. **SentinelRAG combines a small reference stack with three gates** — see
+[docs/COMPARISON.md](docs/COMPARISON.md).
 
 ```mermaid
-flowchart LR
-  Q[Query] --> R[Router<br/>complexity + budget]
-  R --> N[Naive BM25]
-  R --> H[Hybrid + rerank]
-  R --> A[Agentic multi-hop]
-  N & H & A --> G[LLM generation]
-  G --> O[OTel spans + cost]
+flowchart TB
+  subgraph ci [GitHub Actions]
+    E[eval-gate]
+    R[redteam-gate]
+  end
+  Q[Query] --> RT[Router]
+  RT --> N[Naive]
+  RT --> H[Hybrid + rerank]
+  RT --> A[Agentic hops]
+  N & H & A --> LLM[Generation]
   I[Ingest + defenses] --> V[(Qdrant / memory)]
   V --> N & H & A
-  E[Eval / red-team gates] --> CI[GitHub Actions]
+  B[benchmarks/*.json] --> E & R
 ```
 
-## Quickstart
+---
+
+## Results (reproducible, mock embedder, seed 42)
+
+### Mini corpus (CI)
+
+| Strategy | recall@5 | MRR |
+|----------|---------:|----:|
+| naive | 0.83 | 0.37 |
+| hybrid | **1.00** | 0.51 |
+
+### Public sample corpus ([20 original docs](data/PUBLIC_CORPUS.md))
+
+| Strategy | recall@5 | MRR |
+|----------|---------:|----:|
+| naive | 0.25 | 0.10 |
+| hybrid | **1.00** | **1.00** |
+
+| Phase 2 (mock judge) | Value |
+|----------------------|------:|
+| mean faithfulness | 0.83 |
+| mean relevance | 1.00 |
+
+| Red team @ α=0.5 | Value |
+|------------------|------:|
+| defense probe blocked | **1.00** |
+
+Plots: `benchmarks/pareto_plot.png`, `benchmarks/asr_vs_alpha.png`
+
+Regenerate:
 
 ```bash
-uv sync --extra dev
-uv run pytest
+uv run python benchmarks/run_phase1_retrieval.py
+uv run python benchmarks/run_public_retrieval.py
+uv run python benchmarks/run_phase2_eval.py
+uv run python scripts/check_eval_gate.py
+```
 
+---
+
+## Quickstart (no API keys)
+
+```bash
+git clone https://github.com/prakash888kp/SentinelRAG.git
+cd SentinelRAG
+uv sync --extra dev
+cp .env.example .env
+uv run pytest
+uv run python scripts/demo.ps1   # Windows; or docker compose + curl below
+```
+
+```bash
 docker compose up --build -d
 curl -s http://127.0.0.1:8000/health
+curl -s -X POST http://127.0.0.1:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"query":"What is triple-gate RAG?", "strategy":"auto"}'
 ```
 
-Windows one-shot demo: `powershell -File scripts/demo.ps1`
-
-Query strategies: `naive`, `hybrid`, `agentic`, or `auto` (router):
+### PyPI (maintainer publish)
 
 ```bash
-curl -s -X POST http://127.0.0.1:8000/query -H "Content-Type: application/json" \
-  -d '{"query":"How does eval gating work?", "strategy":"auto"}'
+pip install sentinelrag   # after first upload — see docs/PUBLISHING.md
 ```
 
-## Azure-first hosting
+---
 
-Primary host: stop/start Ubuntu VM + Docker Compose. See `docs/CHAT_MEMORY.md`, `docs/azure/RUNBOOK.md`, `scripts/azure_vm_deploy.py`.
+## Compare at a glance
 
-## Phase map
+| | SentinelRAG | rag-ci / ragbench | RAGAS |
+|---|-------------|-------------------|-------|
+| Full FastAPI + Qdrant app | ✓ | — | — |
+| Retrieval CI gate | ✓ | ✓ | partial |
+| Answer quality gate | ✓ | optional | ✓ |
+| **Poison ingest gate** | ✓ | — | — |
+| Adaptive + agentic router | ✓ | — | — |
 
-| Phase | Deliverable |
-|-------|----------------|
-| 0 | Scaffold, MockLLM, `/health`, Compose, CI |
-| 1 | Mini corpus, hybrid retrieval, `phase1_retrieval.json` |
-| 2 | Golden set, LLM judges, `eval-gate` workflow |
-| 3 | Agentic multi-hop, trajectory metrics, tracing |
-| 4 | Router + Pareto quality/cost/latency |
-| 5 | Red-team harness, defenses, `redteam-gate`, ADR-002 |
-| 6 | v0.1.0 release, CHANGELOG, demo script |
+---
 
-## Layout
+## Project layout
 
 ```
-src/sentinelrag/
-  ingest/ retrieval/ router/ generation/ eval/ redteam/ observability/ api/
-benchmarks/ config/ docs/adr/ .github/workflows/
+src/sentinelrag/   # ingest, retrieval, router, eval, redteam, api
+data/public_corpus/  # OSS demo corpus (MIT, in-repo originals)
+benchmarks/        # committed JSON + plots
+config/eval_thresholds.yaml
 ```
 
-## Docs
+Docs: [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md) · [SECURITY_AUDIT.md](docs/SECURITY_AUDIT.md)
 
-- `docs/adr/001-stack.md` — stack and hosting
-- `docs/adr/002-security.md` — poisoning attacks and defenses
-- `CHANGELOG.md` — release notes
+---
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).

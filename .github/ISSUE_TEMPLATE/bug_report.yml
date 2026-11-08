@@ -1,0 +1,46 @@
+name: Bug report
+description: Something broke in SentinelRAG (tests, API, benchmarks, CI)
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect vs what you saw?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        uv sync --extra dev
+        uv run pytest -k ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - retrieval / ingest
+        - eval / judges
+        - red-team / defenses
+        - router / agentic
+        - API / compose
+        - CI / benchmarks
+        - other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: v0.1.0 or git sha
+  - type: checkboxes
+    id: secrets
+    attributes:
+      label: Safety check
+      options:
+        - label: I did not paste API keys, passwords, or private `.env` contents
+          required: true
