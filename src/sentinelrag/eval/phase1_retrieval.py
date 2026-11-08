@@ -13,7 +13,16 @@ from sentinelrag.ingest.pipeline import IndexState, ingest_corpus_dir
 from sentinelrag.paths import mini_corpus_dir, mini_qrels_path
 from sentinelrag.retrieval.reranker import build_reranker
 from sentinelrag.retrieval.strategies import HybridRerankRetriever, NaiveRetriever, StrategyName
-from sentinelrag.settings import Settings
+from sentinelrag.settings import Settings, settings_without_dotenv
+
+
+def _default_benchmark_settings() -> Settings:
+    """Offline benchmark defaults (mock embedder; ignores ``.env`` file only)."""
+    return settings_without_dotenv(
+        embedding_model="mock-embedder",
+        reranker_model="mock-reranker",
+        vector_store_backend="memory",
+    )
 
 
 def corpus_content_hash(corpus_dir: Path) -> str:
@@ -36,7 +45,7 @@ def run_benchmark(
     settings: Settings | None = None,
     strategies: tuple[StrategyName, ...] = ("naive", "hybrid"),
 ) -> dict[str, Any]:
-    cfg = settings if settings is not None else Settings.model_validate({})
+    cfg = settings if settings is not None else _default_benchmark_settings()
     corpus_dir = mini_corpus_dir()
     qrels_path = mini_qrels_path()
     seed, qrels = load_qrels(qrels_path)

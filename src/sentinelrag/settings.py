@@ -91,3 +91,8 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Cached settings singleton for FastAPI dependency injection."""
     return Settings()
+
+
+def settings_without_dotenv(**overrides: object) -> Settings:
+    """Construct settings without reading a repo ``.env`` file (tests / benchmarks)."""
+    return Settings(_env_file=None, **overrides)  # type: ignore[call-arg, arg-type]
