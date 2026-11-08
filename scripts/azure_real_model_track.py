@@ -70,15 +70,16 @@ def main() -> int:
                     sftp.put(str(path), rpath)
 
         path_export = "export PATH=$HOME/.local/bin:$PATH"
+        soft_prefixes = ("pkill ",)
+        soft_contains = ("docker compose stop api",)
         steps = [
             f"cd {remote} && (command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh)",
             f"{path_export} && cd {remote} && uv sync --extra dev --extra ml",
             f"cd {remote} && sudo docker compose stop api || true",
             f"cd {remote} && sudo docker compose up -d qdrant",
-            # Host uvicorn with real embedder (Compose API image has no torch/ml extras)
             "pkill -f 'uvicorn sentinelrag.api.app' || true",
             (
-                f"{path_export} && cd {remote} && "
+                f"bash -lc '{path_export} && cd {remote} && "
                 "nohup env SENTINELRAG_VECTOR_STORE_BACKEND=qdrant "
                 "SENTINELRAG_QDRANT_URL=http://127.0.0.1:6333 "
                 "SENTINELRAG_EMBEDDING_MODEL=BAAI/bge-small-en-v1.5 "
@@ -86,9 +87,9 @@ def main() -> int:
                 "SENTINELRAG_LLM_PROVIDER=gemini "
                 "SENTINELRAG_LLM_MODEL=gemini-2.0-flash "
                 "uv run uvicorn sentinelrag.api.app:app --host 0.0.0.0 --port 8000 "
-                "> /tmp/sentinelrag-api.log 2>&1 & echo $!"
+                "> /tmp/sentinelrag-api.log 2>&1 </dev/null & disown; echo started'"
             ),
-            "sleep 8",
+            "sleep 20",
             f"{path_export} && cd {remote} && uv run pytest -q",
             f"{path_export} && cd {remote} && uv run sentinelrag-gate run --refresh",
             (
@@ -101,7 +102,8 @@ def main() -> int:
         ]
         for cmd in steps:
             print(f"\n>>> {cmd[:100]}")
-            run_ssh(client, cmd, timeout=3600)
+            soft = cmd.startswith(soft_prefixes) or any(s in cmd for s in soft_contains)
+            run_ssh(client, cmd, timeout=3600, allow_fail=soft)
 
         # Pull real benchmark results back
         for name in ("phase1_retrieval_real.json",):

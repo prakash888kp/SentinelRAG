@@ -26,7 +26,13 @@ def load_env(path: Path) -> dict[str, str]:
     return out
 
 
-def run_ssh(client: paramiko.SSHClient, command: str, *, timeout: int = 1200) -> None:
+def run_ssh(
+    client: paramiko.SSHClient,
+    command: str,
+    *,
+    timeout: int = 1200,
+    allow_fail: bool = False,
+) -> int:
     stdin, stdout, stderr = client.exec_command(command, timeout=timeout)
     exit_status = stdout.channel.recv_exit_status()
     out = stdout.read().decode()
@@ -35,8 +41,9 @@ def run_ssh(client: paramiko.SSHClient, command: str, *, timeout: int = 1200) ->
         print(out, end="")
     if err:
         print(err, end="", file=sys.stderr)
-    if exit_status != 0:
+    if exit_status != 0 and not allow_fail:
         raise RuntimeError(f"Command failed ({exit_status}): {command}")
+    return int(exit_status)
 
 
 def main() -> int:
