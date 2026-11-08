@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --extra dev
+      - name: Ruff
+        run: uv run ruff check src tests
+      - name: Mypy
+        run: uv run mypy src/sentinelrag
+      - name: Pytest
+        run: uv run pytest
+        env:
+          SENTINELRAG_ENV: ci
+          SENTINELRAG_LLM_PROVIDER: mock
