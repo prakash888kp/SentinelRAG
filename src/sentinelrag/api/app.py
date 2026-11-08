@@ -9,13 +9,13 @@ from fastapi import FastAPI, Query
 from pydantic import BaseModel, Field
 
 from sentinelrag import __version__
+from sentinelrag.eval.phase2_rag import run_phase2_eval
 from sentinelrag.generation.llm import Message, get_llm
 from sentinelrag.ingest.pipeline import IndexState, ingest_corpus_dir, ingest_document_body
 from sentinelrag.paths import mini_corpus_dir
 from sentinelrag.retrieval.embeddings import build_embedder
 from sentinelrag.retrieval.reranker import build_reranker
 from sentinelrag.retrieval.strategies import HybridRerankRetriever, NaiveRetriever, StrategyName
-from sentinelrag.eval.phase2_rag import run_phase2_eval
 from sentinelrag.settings import Settings, get_settings, settings_without_dotenv
 
 HELLO_PASSAGE = {
