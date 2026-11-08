@@ -1,9 +1,11 @@
-# Live demo — reproduce the README recording
+# Live preview — reproduce what the README shows
 
-The README GIF ([assets/demo-live.gif](assets/demo-live.gif)) is a **terminal recording** of:
+The README GIF ([assets/demo-live.gif](assets/demo-live.gif)) is a **product live-preview** of the warm API path:
 
-1. `sentinelrag-gate run --refresh` (offline, mock)  
-2. `scripts/demo_60s.py` against a warm API (Gemini + bge-small + MiniLM CE)
+1. `/health` with Gemini + real embedder + cross-encoder  
+2. `POST /query?strategy=auto` grounded answer + citations  
+
+Offline gate (no keys): `uv run sentinelrag-gate run --refresh`
 
 ## Reproduce (live path)
 

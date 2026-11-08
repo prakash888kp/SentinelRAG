@@ -16,15 +16,15 @@
 
 ---
 
-## Live demo (recording)
+## Live preview
 
-Warm Gemini + real embedder + cross-encoder path captured as a looping terminal recording (~6s):
+Same path as a warm local stack: `/health` comes up → ask the corpus → Gemini answers with citations (agentic + bge-small + MiniLM CE).
 
 <p align="center">
-  <img src="docs/assets/demo-live.gif" alt="SentinelRAG live demo: gate pass then Gemini query with citations in 5.7s" width="920"/>
+  <img src="docs/assets/demo-live.gif" alt="Live preview of SentinelRAG: health ready, query the corpus, Gemini answer with citations" width="100%"/>
 </p>
 
-Reproduce the same flow on your machine: [docs/DEMO.md](docs/DEMO.md) · refresh the GIF with `uv run python scripts/render_demo_gif.py` (Pillow).
+Run it yourself: [docs/DEMO.md](docs/DEMO.md). Regenerate the preview GIF: `uv run python scripts/render_demo_gif.py`.
 
 ---
 
@@ -99,24 +99,18 @@ See [INTEROPERABILITY.md](docs/INTEROPERABILITY.md).
 
 ## Why this exists
 
-1. Golden-set **retrieval regression** separate from generation  
-2. **CI that fails** on quality drops vs a committed baseline  
-3. **Pre-ingest hygiene** before vectors land  
-4. **Poison / injection probes** beside eval  
-5. **Audit artifacts** — not log spam  
+RAG quality silently drifts. Notebooks look fine; PRs still ship worse recall, ungrounded answers, or a poisoned doc. SentinelRAG makes those three failure modes **CI blockers**.
 
-```mermaid
-flowchart LR
-  CORPUS[Corpus] --> HYG[Hygiene]
-  HYG --> PROV[Provenance]
-  PROV --> ING[Ingest defenses]
-  ING --> RET[Naive / Hybrid / Agentic]
-  RET --> TRIM[Post-retrieval trim]
-  TRIM --> GEN[Generation]
-  RET & GEN & HYG --> GATE[sentinelrag-gate]
-  PF[promptfoo] & RG[Ragas] & DE[DeepEval] --> GATE
-  GATE --> ART[Evidence · JUnit · SARIF]
-```
+<p align="center">
+  <img src="docs/assets/pipeline.svg" alt="Corpus to Defend to Measure to Gate to CI artifacts" width="100%"/>
+</p>
+
+| Pain | What the gate checks |
+|------|----------------------|
+| Retrieval got worse | Recall@K / hit-rate / MRR vs baseline |
+| Answers not grounded | Faithfulness + relevance judges |
+| Poison / junk ingested | Hygiene scan + ingest defenses + poison probes |
+| Auditors want proof | `evidence.json` + JUnit + SARIF on the PR |
 
 ---
 

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="220" viewBox="0 0 980 220" role="img" aria-labelledby="title">
+  <title id="title">How SentinelRAG fails a bad PR</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="980" height="220" rx="16" fill="#f8fafc"/>
+  <text x="24" y="36" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial, sans-serif" font-weight="700">How a PR is blocked</text>
+  <text x="24" y="58" fill="#64748b" font-size="13" font-family="Segoe UI, Arial, sans-serif">Corpus goes through defenses ’ retrieval/eval ’ gate emits evidence or fails CI</text>
+
+  <!-- boxes -->
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="13" text-anchor="middle">
+    <rect x="24" y="90" width="150" height="70" rx="12" fill="#fff" stroke="#cbd5e1"/>
+    <text x="99" y="120" fill="#0f172a" font-weight="700">1. Corpus</text>
+    <text x="99" y="142" fill="#64748b">docs + golden set</text>
+
+    <rect x="214" y="90" width="150" height="70" rx="12" fill="#fff" stroke="#14b8a6"/>
+    <text x="289" y="120" fill="#0f172a" font-weight="700">2. Defend</text>
+    <text x="289" y="142" fill="#64748b">hygiene · poison</text>
+
+    <rect x="404" y="90" width="150" height="70" rx="12" fill="#fff" stroke="#38bdf8"/>
+    <text x="479" y="120" fill="#0f172a" font-weight="700">3. Measure</text>
+    <text x="479" y="142" fill="#64748b">recall · faithfulness</text>
+
+    <rect x="594" y="90" width="150" height="70" rx="12" fill="#fff" stroke="#f59e0b"/>
+    <text x="669" y="120" fill="#0f172a" font-weight="700">4. Gate</text>
+    <text x="669" y="142" fill="#64748b">policy thresholds</text>
+
+    <rect x="784" y="90" width="172" height="70" rx="12" fill="#ecfdf5" stroke="#22c55e"/>
+    <text x="870" y="120" fill="#0f172a" font-weight="700">5. CI artifacts</text>
+    <text x="870" y="142" fill="#64748b">JSON · JUnit · SARIF</text>
+  </g>
+
+  <line x1="174" y1="125" x2="214" y2="125" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="364" y1="125" x2="404" y2="125" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="554" y1="125" x2="594" y2="125" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="744" y1="125" x2="784" y2="125" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <text x="24" y="200" fill="#64748b" font-size="12" font-family="Segoe UI, Arial, sans-serif">Optional: import scores from promptfoo / Ragas / DeepEval into the same gate (step 4).</text>
+</svg>
