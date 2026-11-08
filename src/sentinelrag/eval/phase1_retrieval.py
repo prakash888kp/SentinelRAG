@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from sentinelrag.eval.metrics import mrr, recall_at_k
+from sentinelrag.eval.metrics import hit_rate_at_k, mrr, recall_at_k
 from sentinelrag.ingest.pipeline import IndexState, ingest_corpus_dir
 from sentinelrag.paths import mini_corpus_dir, mini_qrels_path
 from sentinelrag.retrieval.reranker import build_reranker
@@ -74,19 +75,26 @@ def run_benchmark(
                 chunks_by_id=state.chunks,
             )
         recalls: list[float] = []
+        hits_rate: list[float] = []
         mrrs: list[float] = []
+        latencies: list[float] = []
         for item in qrels:
             query = str(item["query"])
             relevant = set(item["relevant_chunk_ids"])
-            hits = retriever.retrieve(query, top_k=k)
-            retrieved_ids = [h.chunk_id for h in hits]
+
+            t0 = time.perf_counter()
+            retrieved_ids = [h.chunk_id for h in retriever.retrieve(query, top_k=k)]
+            latencies.append((time.perf_counter() - t0) * 1000.0)
             recalls.append(recall_at_k(retrieved_ids, relevant, k=k))
+            hits_rate.append(hit_rate_at_k(retrieved_ids, relevant, k=k))
             mrrs.append(mrr(retrieved_ids, relevant))
         rows.append(
             {
                 "strategy": strategy,
                 "recall_at_k": sum(recalls) / len(recalls) if recalls else 0.0,
+                "hit_rate_at_k": sum(hits_rate) / len(hits_rate) if hits_rate else 0.0,
                 "mrr": sum(mrrs) / len(mrrs) if mrrs else 0.0,
+                "latency_ms_mean": sum(latencies) / len(latencies) if latencies else 0.0,
             }
         )
 

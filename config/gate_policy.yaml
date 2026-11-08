@@ -20,6 +20,10 @@ absolute:
   poison_benchmark_v1:
     post_retrieval_asr_max: 0.85
     ingest_block_rate_min: 0.65
+  hygiene:
+    require_passed: true
+  phase1_retrieval_extra:
+    hybrid_hit_rate_at_k_min: 0.80
 
 regression:
   enabled: true

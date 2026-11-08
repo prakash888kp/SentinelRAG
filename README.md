@@ -2,138 +2,137 @@
 
 [![CI](https://github.com/prakash888kp/SentinelRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/ci.yml)
 [![Supply-chain gate](https://github.com/prakash888kp/SentinelRAG/actions/workflows/supply-chain-gate.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/supply-chain-gate.yml)
-[![Eval gate](https://github.com/prakash888kp/SentinelRAG/actions/workflows/eval-gate.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/eval-gate.yml)
-[![Red team gate](https://github.com/prakash888kp/SentinelRAG/actions/workflows/redteam-gate.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/redteam-gate.yml)
+[![PyPI](https://img.shields.io/pypi/v/sentinelrag.svg)](https://pypi.org/project/sentinelrag/)
 
-**RAG supply-chain CI** — one gate for **retrieval**, **grounded answers**, and **poison defenses**,
-plus adaptive routing in a forkable FastAPI + Qdrant reference app.
+**RAG supply-chain CI** — fail builds when **retrieval**, **grounded answers**, or **poison / hygiene defenses** regress. Includes an adaptive FastAPI + Qdrant reference stack.
 
-**Author:** PRAKASH KUMAR K ([@prakash888kp](https://github.com/prakash888kp)) · **PyPI:** `prakash888kp` · **Support:** [GitHub Issues](https://github.com/prakash888kp/SentinelRAG/issues)
+**Author:** PRAKASH KUMAR K ([@prakash888kp](https://github.com/prakash888kp)) · **Support:** [GitHub Issues](https://github.com/prakash888kp/SentinelRAG/issues)
 
-Read the narrative: **[docs/STORY.md](docs/STORY.md)**
+Narrative: [docs/STORY.md](docs/STORY.md) · Security map: [docs/OWASP_RAG_CI_MAP.md](docs/OWASP_RAG_CI_MAP.md)
 
 ---
 
-## The hook in one command
+## Install
 
 ```bash
-uv sync --extra dev
-uv run sentinelrag-gate run --refresh
+pip install sentinelrag
+# or
+uv add sentinelrag
 ```
 
-Writes audit artifacts to `.sentinelrag/gate/`:
-
-| Output | Purpose |
-|--------|---------|
-| `evidence.json` | Versioned metric bundle (`sentinelrag-evidence-v1`) |
-| `junit.xml` | CI test reporting |
-| `sarif.json` | Security dashboard ingestion |
-| `summary.md` | Human-readable PR summary |
-
-Policy as code: `config/gate_policy.yaml` (absolute thresholds + regression vs `benchmarks/baseline_evidence.json`).
-
----
-
-## Why developers search for this
-
-Most RAG repos help you **build**. SentinelRAG helps you **not ship regressions** — including **poisoning bypasses** — with evidence auditors recognize.
-
-| Layer | What fails CI |
-|-------|----------------|
-| Retrieval | Hybrid recall / MRR (`phase1`, public corpus) |
-| Answers | Faithfulness / relevance judges (`phase2`) |
-| Ingest security | Poison defense probes (`redteam`) |
-| Post-retrieval | Trim + **Poison benchmark v1** |
-| Regression | Drops vs anchored baseline |
-
-Security control mapping: [docs/OWASP_RAG_CI_MAP.md](docs/OWASP_RAG_CI_MAP.md)
-
----
-
-## Poison story (60 seconds)
-
-```bash
-uv run sentinelrag-gate demo-poison
-```
-
-Shows ingest blocks, raw retrieval ASR, and post-retrieval trim — the demo link for security-minded teams.
-
----
-
-## Architecture
-
-```mermaid
-flowchart TB
-  subgraph gate [sentinelrag-gate]
-    E[evidence.json]
-    J[JUnit / SARIF]
-    P[gate_policy.yaml]
-  end
-  Q[Query] --> R[Adaptive router]
-  R --> N[Naive] & H[Hybrid] & A[Agentic]
-  I[Ingest defenses] --> V[(Qdrant / memory)]
-  V --> N & H & A
-  N & H & A --> T[Post-retrieval trim]
-  T --> LLM[Generation]
-  B[benchmarks/] --> gate
-```
-
----
-
-## Add to any repo (composite Action)
-
-```yaml
-- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@master
-  with:
-    policy: config/gate_policy.yaml
-    refresh: "true"
-```
-
-Or wire your own stack via `examples/adapter_template.py` (`collect_metrics()`).
-
----
-
-## Quickstart (no API keys)
+Dev clone:
 
 ```bash
 git clone https://github.com/prakash888kp/SentinelRAG.git
 cd SentinelRAG
+uv sync --extra dev
 cp .env.example .env
-uv run pytest
-docker compose up --build -d
 ```
 
-### PyPI
+---
+
+## Out of the box (no API keys)
 
 ```bash
-pip install sentinelrag
-sentinelrag-gate run --refresh
+uv run pytest
+uv run sentinelrag-gate run --refresh
+uv run sentinelrag-gate demo-poison
+uv run sentinelrag-gate scan data/public_corpus --fail-on high
 ```
 
-Publish steps: [docs/PUBLISHING.md](docs/PUBLISHING.md) (maintainer: **prakash888kp**).
+| Command | What it does |
+|---------|----------------|
+| `sentinelrag-gate run` | Policy gate → `evidence.json`, JUnit, SARIF, summary |
+| `sentinelrag-gate collect` | Anchor baseline evidence |
+| `sentinelrag-gate compare` | Metric deltas between evidence files |
+| `sentinelrag-gate scan` | Pre-ingest hygiene (injection / secret-like / PII-like) |
+| `sentinelrag-gate demo-poison` | Poison ASR story (ingest + post-retrieval) |
+
+Artifacts: `.sentinelrag/gate/` · Policy: `config/gate_policy.yaml`
+
+### Drop into any GitHub repo
+
+```yaml
+- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.0
+  with:
+    refresh: "true"
+```
 
 ---
 
-## Results (mock embedder, seed 42)
+## What problem this solves
 
-See committed `benchmarks/*.json` — hybrid recall **1.0** on mini + public corpora; poison v1 in [docs/POISON_BENCHMARK_v1.md](docs/POISON_BENCHMARK_v1.md).
+Teams on Reddit / LocalLLaMA / RAG ops repeatedly ask for:
+
+1. **Golden-set retrieval regression** (recall / hit-rate / MRR) separate from generation  
+2. **CI that fails on quality drops** vs a committed baseline  
+3. **Pre-ingest hygiene** before vectors land in the index  
+4. **Poison / indirect injection probes** in the same pipeline as eval  
+5. **Audit artifacts** (JSON evidence, JUnit, SARIF) — not log spam  
+
+SentinelRAG ships that stack **offline by default** (MockLLM / MockEmbedder).
+
+```mermaid
+flowchart LR
+  CORPUS[Corpus] --> HYG[Hygiene scan]
+  HYG --> PROV[Provenance manifest]
+  PROV --> ING[Ingest defenses]
+  ING --> RET[Naive / Hybrid / Agentic]
+  RET --> TRIM[Post-retrieval trim]
+  TRIM --> GEN[Generation]
+  RET & GEN & HYG --> GATE[sentinelrag-gate]
+  GATE --> ART[Evidence · JUnit · SARIF]
+```
 
 ---
 
-## All-in-one layout
+## Results (mock, seed 42)
 
-```
-sentinelrag-gate      # CLI — collect | run | compare | demo-poison
-src/sentinelrag/gate/ # evidence, policy, SARIF/JUnit, adapter
-data/public_corpus/   # 20-doc OSS sample
-data/golden.jsonl       # portable golden set
-config/gate_policy.yaml
-```
+Committed under `benchmarks/`:
 
-Docs: [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md) · [docs/COMPARISON.md](docs/COMPARISON.md)
+- Mini + public corpus: hybrid **recall@k = 1.0** (also hit-rate + latency)  
+- Phase 2 mock judges: faithfulness / relevance gated  
+- Poison v1 + red-team defense probes  
+- Hygiene report + corpus SHA-256 manifest  
 
 ---
+
+## Layout
+
+```
+src/sentinelrag/
+  api/           FastAPI service
+  ingest/        loaders, chunking, hygiene, provenance, filters
+  retrieval/     BM25, hybrid, agentic, stores
+  router/        complexity + cost policy
+  eval/          metrics, judges, golden I/O, latency
+  redteam/       attacks, defenses, post-retrieval, harness
+  gate/          evidence, policy, CLI, SARIF/JUnit
+  generation/    MockLLM + providers
+  observability/ cost + OTel
+benchmarks/      reproducible JSON + plots
+config/          eval_thresholds.yaml · gate_policy.yaml
+data/            mini_corpus · public_corpus · golden.jsonl
+```
+
+---
+
+## API demo
+
+```bash
+docker compose up --build -d
+curl -s http://127.0.0.1:8000/health
+curl -s -X POST http://127.0.0.1:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"query":"What is triple-gate RAG?", "strategy":"auto"}'
+```
+
+---
+
+## Docs
+
+[CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [CHANGELOG](CHANGELOG.md) · [COMPARISON](docs/COMPARISON.md) · [POISON_BENCHMARK_v1](docs/POISON_BENCHMARK_v1.md)
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT

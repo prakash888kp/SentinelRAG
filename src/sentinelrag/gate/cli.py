@@ -50,6 +50,15 @@ def _cmd_compare(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_scan(args: argparse.Namespace) -> int:
+    from sentinelrag.ingest.hygiene import report_findings, scan_corpus_dir
+
+    findings = scan_corpus_dir(Path(args.path))
+    report = report_findings(findings, fail_on=args.fail_on)
+    print(json.dumps(report, indent=2))
+    return 0 if report["passed"] else 1
+
+
 def _cmd_demo_poison(args: argparse.Namespace) -> int:
     _ = args
     print("=== SentinelRAG poison story (offline) ===\n")
@@ -87,6 +96,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     demo = sub.add_parser("demo-poison", help="Print poison before/after story")
     demo.set_defaults(func=_cmd_demo_poison)
+
+    scan_p = sub.add_parser("scan", help="Pre-ingest hygiene scan on a corpus directory")
+    scan_p.add_argument("path", help="Corpus directory")
+    scan_p.add_argument("--fail-on", default="high", choices=["low", "medium", "high"])
+    scan_p.set_defaults(func=_cmd_scan)
     return parser
 
 

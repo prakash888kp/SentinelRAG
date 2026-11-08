@@ -1,0 +1,8 @@
+{
+  "n_findings": 0,
+  "n_blocking": 0,
+  "fail_on": "high",
+  "passed": true,
+  "findings": [],
+  "policy": "block_secret_like_only"
+}

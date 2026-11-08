@@ -1,11 +1,13 @@
 {
   "schema": "sentinelrag-evidence-v1",
-  "generated_at": "2026-11-08T10:19:01.178320+00:00",
+  "generated_at": "2026-11-08T10:39:25.752381+00:00",
   "project": "SentinelRAG",
   "commit": null,
   "metrics": {
     "phase1_hybrid_recall_at_k": 1.0,
     "phase1_hybrid_mrr": 0.513888888888889,
+    "phase1_hybrid_hit_rate_at_k": 1.0,
+    "phase1_hybrid_latency_ms_mean": 0.17208333338203374,
     "phase2_mean_faithfulness": 0.8312,
     "phase2_mean_relevance": 1.0,
     "phase2_mean_recall_at_k": 1.0,
@@ -20,6 +22,40 @@
       "ingest_block_rate": 0.6666666666666666,
       "post_retrieval_mean_asr": 0.3333333333333333,
       "notes": "mock embedder; post-retrieval trim lowers ASR vs raw retrieval"
+    },
+    "hygiene": {
+      "n_findings": 0,
+      "n_blocking": 0,
+      "fail_on": "high",
+      "passed": true,
+      "findings": [],
+      "policy": "block_secret_like_only"
+    },
+    "provenance": {
+      "corpus": "mini_corpus",
+      "files": [
+        {
+          "path": "01-overview.md",
+          "sha256": "51c125a4726050afd3e90d3a89cebc1bb4f5a614247a1f3b8d6894d1d2926a62"
+        },
+        {
+          "path": "02-ingest.md",
+          "sha256": "b48e315041333796c02978ac54aed2b8f3634a2e5a1a102b0e85f387d8945a62"
+        },
+        {
+          "path": "03-retrieval.md",
+          "sha256": "ffe7adb71493885f49752755f5ebddc99976b19444fffce6e2402f304a8af447"
+        },
+        {
+          "path": "04-eval.md",
+          "sha256": "20e6f59eb491dedd5af9a49eb1b87e201ef382be2a2274cf5f6a84e4963dc8c0"
+        },
+        {
+          "path": "05-security.md",
+          "sha256": "6eb60aaeb7aa0d5ea6a095bab47b92f940dfc054889c831ac70dbfb6df569a52"
+        }
+      ],
+      "manifest_sha256": "651804c17bb87a4f7cdd52e9f0e0bcbede7412a5b0e3e2d54f926c56f529ebc9"
     }
   },
   "violations": [],

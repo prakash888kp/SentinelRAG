@@ -49,6 +49,23 @@ def evaluate_policy(
         violations.append(
             _viol("phase1.hybrid.recall", f"hybrid recall {m['phase1_hybrid_recall_at_k']}")
         )
+    extra = absolute.get("phase1_retrieval_extra", {})
+    if m.get("phase1_hybrid_hit_rate_at_k", 1.0) < extra.get("hybrid_hit_rate_at_k_min", 0.0):
+        violations.append(
+            _viol(
+                "phase1.hybrid.hit_rate",
+                f"hybrid hit_rate {m.get('phase1_hybrid_hit_rate_at_k')}",
+            )
+        )
+    hygiene = s.get("hygiene") or {}
+    if (
+        absolute.get("hygiene", {}).get("require_passed", False)
+        and hygiene
+        and not hygiene.get("passed", True)
+    ):
+        violations.append(
+            _viol("hygiene.scan", f"blocking findings={hygiene.get('n_blocking')}")
+        )
 
     p2 = absolute.get("phase2_rag", {})
     for key, floor_key in (

@@ -34,11 +34,13 @@ def _run_script(rel: str) -> None:
 def refresh_benchmarks() -> None:
     """Regenerate all benchmark artifacts used by the unified gate."""
     for rel in (
+        "benchmarks/run_hygiene_scan.py",
         "benchmarks/run_phase1_retrieval.py",
         "benchmarks/run_public_retrieval.py",
         "benchmarks/run_phase2_eval.py",
         "benchmarks/run_redteam_sweep.py",
         "benchmarks/run_poison_benchmark_v1.py",
+        "benchmarks/export_leaderboard.py",
     ):
         _run_script(rel)
 

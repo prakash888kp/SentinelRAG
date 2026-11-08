@@ -2,8 +2,8 @@
   "sweep": [
     {
       "alpha": 0.0,
-      "mean_retrieval_asr": 0.6666666666666666,
-      "mean_generation_asr": 0.6666666666666666,
+      "mean_retrieval_asr": 1.0,
+      "mean_generation_asr": 1.0,
       "defense_probe_blocked_fraction": 1.0
     },
     {

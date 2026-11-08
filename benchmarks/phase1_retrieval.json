@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T10:18:57.964972+00:00",
+  "generated_at": "2026-11-08T10:39:22.511511+00:00",
   "embedding_model": "mock-embedder",
   "reranker_model": "mock-reranker",
   "corpus_hash": "008f44c7f5078bdf",
@@ -10,12 +10,16 @@
     {
       "strategy": "naive",
       "recall_at_k": 0.8333333333333334,
-      "mrr": 0.3666666666666667
+      "hit_rate_at_k": 0.8333333333333334,
+      "mrr": 0.3666666666666667,
+      "latency_ms_mean": 0.08626666628212358
     },
     {
       "strategy": "hybrid",
       "recall_at_k": 1.0,
-      "mrr": 0.513888888888889
+      "hit_rate_at_k": 1.0,
+      "mrr": 0.513888888888889,
+      "latency_ms_mean": 0.17208333338203374
     }
   ]
 }

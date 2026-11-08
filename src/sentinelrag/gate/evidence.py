@@ -47,8 +47,10 @@ def _hybrid_row(phase1: dict[str, Any]) -> dict[str, float]:
             return {
                 "recall_at_k": float(row["recall_at_k"]),
                 "mrr": float(row["mrr"]),
+                "hit_rate_at_k": float(row.get("hit_rate_at_k", row["recall_at_k"])),
+                "latency_ms_mean": float(row.get("latency_ms_mean", 0.0)),
             }
-    return {"recall_at_k": 0.0, "mrr": 0.0}
+    return {"recall_at_k": 0.0, "mrr": 0.0, "hit_rate_at_k": 0.0, "latency_ms_mean": 0.0}
 
 
 def collect_evidence(*, root: Path | None = None) -> EvidenceBundle:
@@ -77,6 +79,8 @@ def collect_evidence(*, root: Path | None = None) -> EvidenceBundle:
         metrics={
             "phase1_hybrid_recall_at_k": hybrid["recall_at_k"],
             "phase1_hybrid_mrr": hybrid["mrr"],
+            "phase1_hybrid_hit_rate_at_k": hybrid["hit_rate_at_k"],
+            "phase1_hybrid_latency_ms_mean": hybrid["latency_ms_mean"],
             "phase2_mean_faithfulness": float(phase2.get("mean_faithfulness", 0.0)),
             "phase2_mean_relevance": float(phase2.get("mean_relevance", 0.0)),
             "phase2_mean_recall_at_k": float(phase2.get("mean_recall_at_k", 0.0)),
@@ -94,6 +98,8 @@ def collect_evidence(*, root: Path | None = None) -> EvidenceBundle:
         security_probes={
             "ingest_defense_blocked_fraction": defense_frac,
             "poison_benchmark_v1": poison,
+            "hygiene": _load_json(bench / "hygiene_report.json"),
+            "provenance": _load_json(bench / "corpus_manifest.json"),
         },
     )
     return bundle

@@ -1,32 +1,20 @@
 # Changelog
 
-All notable changes to SentinelRAG are documented here.
-
-## [Unreleased]
+## [0.2.0] — 2026-11-08
 
 ### Added
 
-- **Phase 7 — supply-chain gate:** `sentinelrag-gate` CLI, `config/gate_policy.yaml`, evidence v1, SARIF/JUnit/Markdown reports.
-- Post-retrieval `PostRetrievalTrim`, **Poison benchmark v1**, `baseline_evidence.json`.
-- Composite Action `.github/actions/sentinelrag-gate`, workflow `supply-chain-gate.yml`.
-- Golden `data/golden.jsonl`, adapter template, OWASP CI map, narrative `docs/STORY.md`.
-- OSS launch pack: CONTRIBUTING, public corpus, secret scan CI, PyPI metadata (`prakash888kp`).
-
-## [0.1.0] — 2026-11-08
-
-### Added
-
-- **Phase 3**: Multi-hop `AgenticMultiHopRetriever`, trajectory metrics, OTel spans, `strategy=agentic|auto` on `/query`.
-- **Phase 4**: Query complexity router and cost/latency Pareto benchmark (`benchmarks/pareto_points.json`).
-- **Phase 5**: Red-team attacks/defenses, ASR vs hybrid-alpha sweep, `redteam-gate` CI workflow, ADR-002 security notes.
-- **Phase 6**: v0.1.0 package, expanded tests (≥80% coverage), README claims table, `scripts/demo.ps1`.
+- Pre-ingest **hygiene scanner** (`sentinelrag-gate scan`) and corpus **provenance** manifests.
+- Retrieval **hit_rate@k** + **latency_ms_mean** in Phase 1 / public benchmarks and evidence.
+- Citation coverage helper; expanded supply-chain gate policy.
+- Dependabot, CodeQL, CODEOWNERS, labeler, release notes config.
+- Poison benchmark v1, SARIF/JUnit evidence gate, composite Action (from 0.1.x line).
 
 ### Changed
 
-- OpenTelemetry API/SDK and matplotlib (dev) dependencies.
-- Eval thresholds extended with Phase 5 defense probe gate.
+- Package version **0.2.0**; README focused on install + out-of-box gate usage.
+- Maintainer-complete surface — no open “good first issue” backlog documents.
 
-### Fixed
+## [0.1.0] — 2026-11-08
 
-- Benchmark runners now invoke `main()` when executed as scripts.
-- Red-team `metadata_only_poison` bypasses trust_score validation via `model_construct`.
+- Phases 0–6: adaptive RAG, eval gates, red-team, OSS launch pack.

@@ -1,6 +1,6 @@
 [project]
 name = "sentinelrag"
-version = "0.1.0"
+version = "0.2.0"
 description = "Triple-gate adaptive RAG: CI gates for retrieval, answer quality, and ingest poison defenses"
 readme = "README.md"
 license = { text = "MIT" }

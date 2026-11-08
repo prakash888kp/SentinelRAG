@@ -1,0 +1,18 @@
+gate:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/sentinelrag/gate/**
+          - config/gate_policy.yaml
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/sentinelrag/redteam/**
+          - src/sentinelrag/ingest/hygiene.py
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
