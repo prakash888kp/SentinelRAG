@@ -75,6 +75,29 @@ def _cmd_demo_poison(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_import(args: argparse.Namespace) -> int:
+    from sentinelrag.gate.importers import import_deepeval, import_promptfoo, import_ragas
+
+    src = Path(args.path)
+    out = Path(args.output)
+    rev = args.source_revision
+    if args.kind == "promptfoo":
+        bundle = import_promptfoo(src, source_revision=rev)
+    elif args.kind == "ragas":
+        mets = args.metric or None
+        bundle = import_ragas(
+            src,
+            metrics=mets,
+            producer_version=args.producer_version,
+            source_revision=rev,
+        )
+    else:
+        bundle = import_deepeval(src, source_revision=rev)
+    bundle.write_json(out)
+    print(f"Wrote {out} ({bundle.schema}, {len(bundle.metrics)} metrics)")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="sentinelrag-gate", description="SentinelRAG CI gate")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -101,6 +124,20 @@ def build_parser() -> argparse.ArgumentParser:
     scan_p.add_argument("path", help="Corpus directory")
     scan_p.add_argument("--fail-on", default="high", choices=["low", "medium", "high"])
     scan_p.set_defaults(func=_cmd_scan)
+
+    imp = sub.add_parser("import", help="Import promptfoo / Ragas / DeepEval scores into evidence")
+    imp.add_argument("kind", choices=["promptfoo", "ragas", "deepeval"])
+    imp.add_argument("path", help="Evaluator JSON output path")
+    imp.add_argument("--output", "-o", default="build/sentinelrag-artifact.json")
+    imp.add_argument("--source-revision", default=None)
+    imp.add_argument("--producer-version", default=None, help="Ragas producer version label")
+    imp.add_argument(
+        "--metric",
+        action="append",
+        default=[],
+        help="Ragas metric column (repeatable)",
+    )
+    imp.set_defaults(func=_cmd_import)
     return parser
 
 

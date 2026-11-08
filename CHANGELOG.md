@@ -9,6 +9,8 @@
 - Citation coverage helper; expanded supply-chain gate policy.
 - Dependabot, CodeQL, CODEOWNERS, labeler, release notes config.
 - Poison benchmark v1, SARIF/JUnit evidence gate, composite Action (from 0.1.x line).
+- `sentinelrag-gate import` for **promptfoo / Ragas / DeepEval** score files.
+- Docs suite (architecture, metrics, CI cookbook, interoperability, …), JSON Schemas, demo GIF.
 
 ### Changed
 

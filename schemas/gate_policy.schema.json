@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/prakash888kp/SentinelRAG/schemas/gate_policy.schema.json",
+  "title": "SentinelRAG Gate Policy",
+  "type": "object",
+  "required": ["schema"],
+  "additionalProperties": true,
+  "properties": {
+    "schema": { "type": "string" },
+    "absolute": { "type": "object" },
+    "baseline_deltas": { "type": "object" },
+    "security": { "type": "object" }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/prakash888kp/SentinelRAG/schemas/evidence.schema.json",
+  "title": "SentinelRAG Evidence Bundle",
+  "description": "Portable CI evidence artifact (sentinelrag-evidence-v1).",
+  "type": "object",
+  "required": ["schema", "metrics"],
+  "additionalProperties": true,
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "sentinelrag-evidence-v1"
+    },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "project": { "type": "string" },
+    "commit": { "type": ["string", "null"] },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "type": ["number", "string", "boolean", "object", "array", "null"] }
+    },
+    "security_probes": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule": { "type": "string" },
+          "message": { "type": "string" }
+        },
+        "required": ["rule", "message"]
+      }
+    },
+    "passed": { "type": "boolean" }
+  }
+}

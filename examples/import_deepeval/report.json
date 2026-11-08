@@ -1,0 +1,18 @@
+{
+  "testResults": [
+    {
+      "metrics": [
+        {"name": "faithfulness", "score": 0.91},
+        {"name": "answer_relevancy", "score": 0.87},
+        {"name": "contextual_recall", "score": 0.96}
+      ]
+    },
+    {
+      "metrics": [
+        {"name": "faithfulness", "score": 0.85},
+        {"name": "answer_relevancy", "score": 0.9},
+        {"name": "contextual_recall", "score": 1.0}
+      ]
+    }
+  ]
+}

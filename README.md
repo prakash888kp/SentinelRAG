@@ -6,66 +6,86 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**RAG evaluation and security CI for retrieval-augmented generation.**  
-Fail the build when **retrieval recall**, **answer grounding**, or **corpus poison / hygiene defenses** regress — with evidence, JUnit, and SARIF. Ships an adaptive FastAPI + Qdrant reference stack.
+<p align="center">
+  <img src="docs/assets/hero.svg" alt="SentinelRAG — triple-gate RAG supply-chain CI" width="100%"/>
+</p>
 
-Searchable keywords: RAG CI · retrieval regression testing · LLM security · corpus poisoning · hygiene scan · hybrid BM25 · cross-encoder rerank · agentic RAG · GitHub Actions gate.
+**RAG supply-chain CI** — fail builds when **retrieval**, **answer grounding**, or **corpus poison / hygiene defenses** regress. Ships evidence (JSON), JUnit, SARIF, an adaptive FastAPI + Qdrant reference stack, and importers for promptfoo / Ragas / DeepEval scores.
 
-**Author:** PRAKASH KUMAR K ([@prakash888kp](https://github.com/prakash888kp)) · **Support:** [GitHub Issues](https://github.com/prakash888kp/SentinelRAG/issues)
-
-[Story](docs/STORY.md) · [Demo](docs/DEMO.md) · [Phases](docs/PHASES.md) · [OWASP map](docs/OWASP_RAG_CI_MAP.md) · [Comparison](docs/COMPARISON.md)
+**Author:** PRAKASH KUMAR K ([@prakash888kp](https://github.com/prakash888kp)) · **Issues:** [GitHub Issues](https://github.com/prakash888kp/SentinelRAG/issues)
 
 ---
 
-## Install
+## Live demo (recording)
+
+Warm Gemini + real embedder + cross-encoder path captured as a looping terminal recording (~6s):
+
+<p align="center">
+  <img src="docs/assets/demo-live.gif" alt="SentinelRAG live demo: gate pass then Gemini query with citations in 5.7s" width="920"/>
+</p>
+
+Reproduce the same flow on your machine: [docs/DEMO.md](docs/DEMO.md) · refresh the GIF with `uv run python scripts/render_demo_gif.py` (Pillow).
+
+---
+
+## Capability matrix
+
+| Capability | Included |
+|---|---|
+| Portable evidence | Versioned `sentinelrag-evidence-v1` JSON + [JSON Schemas](schemas/evidence.schema.json) |
+| Policy gates | Absolute floors + baseline deltas (`config/gate_policy.yaml`) |
+| CI reports | Exit codes + JSON, JUnit XML, SARIF 2.1.0, Markdown summary |
+| GitHub integration | Reusable [composite Action](.github/actions/sentinelrag-gate/action.yml) — no hosted account |
+| Import promptfoo | `sentinelrag-gate import promptfoo` → evidence |
+| Import Ragas | `sentinelrag-gate import ragas` → evidence |
+| Import DeepEval | `sentinelrag-gate import deepeval` → evidence |
+| Golden retrieval | Mini + public corpora, Recall@K / MRR / hit-rate |
+| Hybrid + CE | BM25 + dense fusion + optional MiniLM cross-encoder |
+| Agentic RAG | Multi-hop retriever + trajectory metrics |
+| Router / Pareto | Complexity policy + cost/latency benchmarks |
+| Hygiene scan | Injection / secret-like / PII-like pre-ingest |
+| Poison / red-team | Ingest defenses + post-retrieval trim + ASR sweeps |
+| Live generation | Gemini 2.5 Flash (CI stays MockLLM) |
+| Delivery | pytest, uv, Docker Compose, PyPI `sentinelrag` |
+
+---
+
+## Quick start
+
+### Quality gate (no server or model key)
 
 ```bash
 pip install sentinelrag
-# or
-uv add sentinelrag
-```
-
-From source:
-
-```bash
+# or from source:
 git clone https://github.com/prakash888kp/SentinelRAG.git
 cd SentinelRAG
 uv sync --extra dev
-cp .env.example .env
-```
 
----
-
-## Out of the box
-
-### Offline / CI (no API keys)
-
-```bash
-uv run pytest
 uv run sentinelrag-gate run --refresh
 uv run sentinelrag-gate demo-poison
 uv run sentinelrag-gate scan data/public_corpus --fail-on high
 ```
 
-### Live 30–60s demo (Gemini + real embedder + cross-encoder)
+Artifacts: `.sentinelrag/gate/` · Policy: `config/gate_policy.yaml`
 
-See **[docs/DEMO.md](docs/DEMO.md)**. After Qdrant + API are warm:
+### Import promptfoo evidence
 
 ```bash
-uv sync --extra ml
-uv run python scripts/warmup_live_models.py   # once
-uv run python scripts/demo_60s.py
+uv run sentinelrag-gate import promptfoo examples/import_promptfoo/results.json \
+  -o build/from-promptfoo.json --source-revision "$GITHUB_SHA"
 ```
 
-| Command | What it does |
-|---------|----------------|
-| `sentinelrag-gate run` | Policy gate → `evidence.json`, JUnit, SARIF, summary |
-| `sentinelrag-gate collect` | Anchor baseline evidence |
-| `sentinelrag-gate compare` | Metric deltas between evidence files |
-| `sentinelrag-gate scan` | Pre-ingest hygiene (injection / secret-like / PII-like) |
-| `sentinelrag-gate demo-poison` | Poison ASR story (ingest + post-retrieval) |
+### Import Ragas or DeepEval evidence
 
-Artifacts: `.sentinelrag/gate/` · Policy: `config/gate_policy.yaml`
+```bash
+uv run sentinelrag-gate import ragas examples/import_ragas/evaluation-result-records.json \
+  --metric faithfulness --metric answer_relevancy -o build/from-ragas.json
+
+uv run sentinelrag-gate import deepeval examples/import_deepeval/report.json \
+  -o build/from-deepeval.json
+```
+
+See [INTEROPERABILITY.md](docs/INTEROPERABILITY.md).
 
 ### Drop into any GitHub repo
 
@@ -77,27 +97,24 @@ Artifacts: `.sentinelrag/gate/` · Policy: `config/gate_policy.yaml`
 
 ---
 
-## What problem this solves
+## Why this exists
 
-Teams building RAG systems need:
-
-1. **Golden-set retrieval regression** (recall / hit-rate / MRR) separate from generation  
-2. **CI that fails on quality drops** vs a committed baseline  
-3. **Pre-ingest hygiene** before vectors land in the index  
-4. **Poison / indirect injection probes** in the same pipeline as eval  
-5. **Audit artifacts** (JSON evidence, JUnit, SARIF) — not log spam  
-
-SentinelRAG ships that stack **offline by default** (MockLLM / MockEmbedder).
+1. Golden-set **retrieval regression** separate from generation  
+2. **CI that fails** on quality drops vs a committed baseline  
+3. **Pre-ingest hygiene** before vectors land  
+4. **Poison / injection probes** beside eval  
+5. **Audit artifacts** — not log spam  
 
 ```mermaid
 flowchart LR
-  CORPUS[Corpus] --> HYG[Hygiene scan]
-  HYG --> PROV[Provenance manifest]
+  CORPUS[Corpus] --> HYG[Hygiene]
+  HYG --> PROV[Provenance]
   PROV --> ING[Ingest defenses]
   ING --> RET[Naive / Hybrid / Agentic]
   RET --> TRIM[Post-retrieval trim]
   TRIM --> GEN[Generation]
   RET & GEN & HYG --> GATE[sentinelrag-gate]
+  PF[promptfoo] & RG[Ragas] & DE[DeepEval] --> GATE
   GATE --> ART[Evidence · JUnit · SARIF]
 ```
 
@@ -105,56 +122,39 @@ flowchart LR
 
 ## Results
 
-**CI / mock** (`benchmarks/phase1_retrieval.json`, seed 42): hybrid recall@k **1.0**
+**CI / mock** (`benchmarks/phase1_retrieval.json`): hybrid recall@k **1.0**
 
-**Real embedder** (`benchmarks/phase1_retrieval_real.json`, `bge-small-en-v1.5`):
+**Real embedder** (`phase1_retrieval_real.json`, `bge-small`):
 
-| Corpus | naive recall@5 | hybrid recall@5 |
-|--------|---------------:|----------------:|
+| Corpus | naive@5 | hybrid@5 |
+|--------|--------:|---------:|
 | mini | **1.0** | **1.0** |
-| public (20 docs) | **1.0** | **1.0** |
-
-Also: poison v1, hygiene, provenance, phase2 mock judges in CI. Live path: **Gemini 2.5 Flash** + `bge-small` + MiniLM cross-encoder ([DEMO](docs/DEMO.md)).
-
----
-
-## Layout
-
-```
-src/sentinelrag/
-  api/           FastAPI service
-  ingest/        loaders, chunking, hygiene, provenance, filters
-  retrieval/     BM25, hybrid, agentic, stores
-  router/        complexity + cost policy
-  eval/          metrics, judges, golden I/O, latency
-  redteam/       attacks, defenses, post-retrieval, harness
-  gate/          evidence, policy, CLI, SARIF/JUnit
-  generation/    MockLLM + Gemini (live)
-  observability/ cost + OTel
-benchmarks/      reproducible JSON + plots
-config/          eval_thresholds.yaml · gate_policy.yaml
-data/            mini_corpus · public_corpus · golden.jsonl
-```
-
----
-
-## API demo
-
-```bash
-docker compose up --build -d
-curl -s http://127.0.0.1:8000/health
-curl -s -X POST http://127.0.0.1:8000/query \
-  -H "Content-Type: application/json" \
-  -d '{"query":"What is triple-gate RAG?", "strategy":"auto"}'
-```
-
-Host bootstrap (Docker Engine on a fresh Ubuntu box): `scripts/bootstrap-docker-host.sh`
+| public | **1.0** | **1.0** |
 
 ---
 
 ## Docs
 
-[CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [CHANGELOG](CHANGELOG.md) · [PHASES](docs/PHASES.md) · [DEMO](docs/DEMO.md) · [COMPARISON](docs/COMPARISON.md) · [POISON_BENCHMARK_v1](docs/POISON_BENCHMARK_v1.md)
+| Doc | Topic |
+|-----|-------|
+| [ARCHITECTURE](docs/ARCHITECTURE.md) | Stack diagram |
+| [BENCHMARK](docs/BENCHMARK.md) | How numbers are produced |
+| [METRICS](docs/METRICS.md) | Metric dictionary |
+| [CI_COOKBOOK](docs/CI_COOKBOOK.md) | Actions recipes |
+| [DEPLOYMENT](docs/DEPLOYMENT.md) | Compose + env |
+| [INTEROPERABILITY](docs/INTEROPERABILITY.md) | promptfoo / Ragas / DeepEval |
+| [ECOSYSTEM](docs/ECOSYSTEM.md) | Related projects |
+| [CASE_STUDY](docs/CASE_STUDY.md) | Failure modes we catch |
+| [PHASES](docs/PHASES.md) | 0–7 checklist |
+| [DEMO](docs/DEMO.md) | Reproduce the live recording |
+| [OSS_READINESS](docs/OSS_READINESS.md) | Public launch checklist |
+| [PORTFOLIO](docs/PORTFOLIO.md) | Highlights |
+| [RELEASE_CHECKLIST](docs/RELEASE_CHECKLIST.md) | Tag / release steps |
+| [STORY](docs/STORY.md) · [OWASP map](docs/OWASP_RAG_CI_MAP.md) · [COMPARISON](docs/COMPARISON.md) | Narrative |
+
+Examples: [examples/README.md](examples/README.md) · Schemas: [schemas/](schemas/) · Plans: [docs/superpowers/plans](docs/superpowers/plans/)
+
+---
 
 ## License
 

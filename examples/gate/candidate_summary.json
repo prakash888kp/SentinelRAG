@@ -1,0 +1,12 @@
+{
+  "schema": "sentinelrag-evidence-v1",
+  "metrics": {
+    "phase1_hybrid_recall_at_k": 1.0,
+    "phase2_mean_faithfulness": 0.83,
+    "phase2_mean_relevance": 1.0,
+    "phase2_mean_recall_at_k": 1.0
+  },
+  "security_probes": {
+    "ingest_defense_blocked_fraction": 1.0
+  }
+}

@@ -1,19 +1,16 @@
-# 30–60 second demo (Gemini + real embedder + cross-encoder)
+# Live demo — reproduce the README recording
 
-Live generation uses **Gemini** (`gemini-2.5-flash`). CI stays on mocks — no API keys required for gates.
+The README GIF ([assets/demo-live.gif](assets/demo-live.gif)) is a **terminal recording** of:
 
-## Prerequisites
+1. `sentinelrag-gate run --refresh` (offline, mock)  
+2. `scripts/demo_60s.py` against a warm API (Gemini + bge-small + MiniLM CE)
 
-- `GEMINI_API_KEY` in `.env`
-- `uv sync --extra ml` (sentence-transformers / torch)
-- Qdrant running (`docker compose up -d qdrant`)
-- API started with real models (not the slim Compose API image alone)
+## Reproduce (live path)
 
 ```bash
 docker compose up -d qdrant
 docker compose stop api || true
-
-# First time on a machine (downloads weights):
+uv sync --extra ml
 uv run python scripts/warmup_live_models.py
 
 SENTINELRAG_VECTOR_STORE_BACKEND=qdrant \
@@ -25,25 +22,19 @@ SENTINELRAG_LLM_MODEL=gemini-2.5-flash \
 uv run uvicorn sentinelrag.api.app:app --host 0.0.0.0 --port 8000
 ```
 
-In another shell:
-
 ```bash
+# requires GEMINI_API_KEY in .env
 uv run python scripts/demo_60s.py
 ```
 
-Cold start downloads models once; warm demos stay in the 30–60s window.
+## Refresh the GIF
 
-## What you see
+```bash
+uv pip install pillow   # or any env with Pillow
+uv run python scripts/render_demo_gif.py
+```
 
-1. `/health` — `llm_provider=gemini`, embedder + cross-encoder model ids  
-2. `/ingest` — public corpus into Qdrant (skipped if already indexed)  
-3. `/query?strategy=auto` — grounded Gemini answer + citations  
-
-## CI vs demo
-
-| Mode | Embedder | Reranker | LLM | Where |
-|------|----------|----------|-----|--------|
-| CI / `sentinelrag-gate` | mock | mock | mock | GitHub Actions |
-| Live demo | `bge-small` | `ms-marco-MiniLM-L-6-v2` | Gemini 2.5 Flash | Your machine |
-
-Phase map: [PHASES.md](PHASES.md)
+| Mode | Embedder | Reranker | LLM |
+|------|----------|----------|-----|
+| CI / gate | mock | mock | mock |
+| Live recording | `bge-small` | MiniLM CE | Gemini 2.5 Flash |
