@@ -1,0 +1,23 @@
+{
+  "name": "SentinelRAG strategy Pareto",
+  "points": [
+    {
+      "strategy": "naive",
+      "quality_recall_at_k": 0.8333333333333334,
+      "cost_usd": 5e-05,
+      "latency_ms": 13.85
+    },
+    {
+      "strategy": "hybrid",
+      "quality_recall_at_k": 1.0,
+      "cost_usd": 0.0002,
+      "latency_ms": 5.06
+    },
+    {
+      "strategy": "agentic",
+      "quality_recall_at_k": 1.0,
+      "cost_usd": 0.0012,
+      "latency_ms": 85.0
+    }
+  ]
+}

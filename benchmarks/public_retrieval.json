@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T09:00:39.652455+00:00",
+  "generated_at": "2026-11-08T10:18:58.620938+00:00",
   "embedding_model": "mock-embedder",
   "reranker_model": "mock-reranker",
   "corpus_hash": "04c6e8d3e76c07fa",

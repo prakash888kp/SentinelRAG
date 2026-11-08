@@ -1,0 +1,6 @@
+{
+  "version": "poison_benchmark_v1",
+  "ingest_block_rate": 0.6666666666666666,
+  "post_retrieval_mean_asr": 0.3333333333333333,
+  "notes": "mock embedder; post-retrieval trim lowers ASR vs raw retrieval"
+}

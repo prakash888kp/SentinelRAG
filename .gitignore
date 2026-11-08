@@ -33,6 +33,9 @@ Thumbs.db
 .vscode/
 *.swp
 
+# Local gate outputs (regenerate with sentinelrag-gate run)
+.sentinelrag/
+
 # Benchmarks / local data (keep committed JSON results when intentional)
 *.log
 data/raw/

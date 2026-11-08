@@ -1,0 +1,27 @@
+{
+  "schema": "sentinelrag-evidence-v1",
+  "generated_at": "2026-11-08T10:19:01.178320+00:00",
+  "project": "SentinelRAG",
+  "commit": null,
+  "metrics": {
+    "phase1_hybrid_recall_at_k": 1.0,
+    "phase1_hybrid_mrr": 0.513888888888889,
+    "phase2_mean_faithfulness": 0.8312,
+    "phase2_mean_relevance": 1.0,
+    "phase2_mean_recall_at_k": 1.0,
+    "public_hybrid_recall_at_k": 1.0,
+    "public_naive_recall_at_k": 0.25,
+    "redteam_mean_retrieval_asr_alpha_0_5": 1.0
+  },
+  "security_probes": {
+    "ingest_defense_blocked_fraction": 1.0,
+    "poison_benchmark_v1": {
+      "version": "poison_benchmark_v1",
+      "ingest_block_rate": 0.6666666666666666,
+      "post_retrieval_mean_asr": 0.3333333333333333,
+      "notes": "mock embedder; post-retrieval trim lowers ASR vs raw retrieval"
+    }
+  },
+  "violations": [],
+  "passed": true
+}

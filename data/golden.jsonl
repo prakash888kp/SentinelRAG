@@ -1,0 +1,5 @@
+{"id": "sh-01", "query": "What is SentinelRAG?", "expected_chunk_ids": ["01-overview::0"], "kind": "single_hop", "citations_required": true}
+{"id": "sh-02", "query": "Name three chunking strategies in Phase 1.", "expected_chunk_ids": ["02-ingest::0"], "kind": "single_hop", "citations_required": true}
+{"id": "sh-03", "query": "What does hybrid retrieval fuse?", "expected_chunk_ids": ["03-retrieval::0"], "kind": "single_hop", "citations_required": true}
+{"id": "mh-01", "query": "How do ingestion chunking choices and retrieval metrics connect in Phase 1 benchmarks?", "expected_chunk_ids": ["02-ingest::0", "04-eval::0"], "kind": "single_hop", "citations_required": true}
+{"id": "mh-02", "query": "How do security defenses relate to eval CI gates?", "expected_chunk_ids": ["04-eval::0", "05-security::0"], "kind": "single_hop", "citations_required": true}

@@ -6,9 +6,11 @@ All notable changes to SentinelRAG are documented here.
 
 ### Added
 
-- OSS launch pack: CONTRIBUTING, SECURITY, CoC, issue templates, public corpus benchmark.
-- `scripts/verify_repo_secrets.py` and CI secret scan step.
-- PyPI-oriented metadata (`docs/PUBLISHING.md`); package not yet published.
+- **Phase 7 — supply-chain gate:** `sentinelrag-gate` CLI, `config/gate_policy.yaml`, evidence v1, SARIF/JUnit/Markdown reports.
+- Post-retrieval `PostRetrievalTrim`, **Poison benchmark v1**, `baseline_evidence.json`.
+- Composite Action `.github/actions/sentinelrag-gate`, workflow `supply-chain-gate.yml`.
+- Golden `data/golden.jsonl`, adapter template, OWASP CI map, narrative `docs/STORY.md`.
+- OSS launch pack: CONTRIBUTING, public corpus, secret scan CI, PyPI metadata (`prakash888kp`).
 
 ## [0.1.0] — 2026-11-08
 

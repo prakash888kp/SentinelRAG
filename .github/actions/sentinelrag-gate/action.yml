@@ -1,0 +1,42 @@
+name: SentinelRAG supply-chain gate
+description: Run unified retrieval, quality, and poison gates with SARIF/JUnit outputs
+inputs:
+  policy:
+    description: Path to gate_policy.yaml
+    required: false
+    default: config/gate_policy.yaml
+  baseline:
+    description: Baseline evidence JSON
+    required: false
+    default: benchmarks/baseline_evidence.json
+  refresh:
+    description: Regenerate benchmarks before gate
+    required: false
+    default: "false"
+  working-directory:
+    description: Repository root
+    required: false
+    default: "."
+outputs:
+  passed:
+    description: Whether the gate passed
+    value: ${{ steps.gate.outputs.passed }}
+runs:
+  using: composite
+  steps:
+    - name: Install package
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        pip install uv
+        uv sync --extra dev
+    - name: Run gate
+      id: gate
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        set -e
+        ARGS="run --policy ${{ inputs.policy }} --baseline ${{ inputs.baseline }}"
+        if [ "${{ inputs.refresh }}" = "true" ]; then ARGS="$ARGS --refresh"; fi
+        uv run sentinelrag-gate $ARGS
+        echo "passed=true" >> "$GITHUB_OUTPUT"
