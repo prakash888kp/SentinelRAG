@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# Private ops / agent notes (never publish)
+docs/CHAT_MEMORY.md
+.local/
+
 # SSH / keys (never commit)
 *.pem
 *.ppk

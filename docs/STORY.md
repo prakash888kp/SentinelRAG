@@ -45,7 +45,10 @@ uv run sentinelrag-gate demo-poison
 Shows raw retrieval attack surface vs ingest blocks vs post-retrieval trim — the narrative hook
 for security-minded teams.
 
-## Epilogue — Publish
+## Epilogue — Anchor the baseline
 
-Anchor baseline: `uv run sentinelrag-gate collect`  
-Publish to PyPI as **PRAKASH KUMAR K** (`prakash888kp`) when ready — see `docs/PUBLISHING.md`.
+```bash
+uv run sentinelrag-gate collect
+```
+
+Commit the evidence under `.sentinelrag/gate/` (or your policy’s artifact path) so the next PR fails loudly if recall, faithfulness, or poison defenses slip.

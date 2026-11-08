@@ -14,6 +14,8 @@
 
 - Package version **0.2.0**; README focused on install + out-of-box gate usage.
 - Maintainer-complete surface — no open “good first issue” backlog documents.
+- Live track: **Gemini** generation + real MiniLM cross-encoder (cached); phase checklist in `docs/PHASES.md`.
+- Publish-ready cleanup: removed private Azure ops scripts/docs; SEO keywords + badges; public ADRs.
 
 ## [0.1.0] — 2026-11-08
 

@@ -33,8 +33,12 @@ def main() -> int:
         print(f"API not reachable at {base}: {exc}", file=sys.stderr)
         print("Start stack: docker compose up -d qdrant && uv run uvicorn …", file=sys.stderr)
         return 1
-    print(f"1) health: {health.get('status')} version={health.get('version')} "
-          f"llm={health.get('llm_provider')} index_ready={health.get('index_ready')}")
+    print(
+        f"1) health: {health.get('status')} version={health.get('version')} "
+        f"llm={health.get('llm_provider')}/{health.get('llm_model')} "
+        f"embed={health.get('embedding_model')} rerank={health.get('reranker_model')} "
+        f"index_ready={health.get('index_ready')}"
+    )
 
     if not health.get("index_ready"):
         print("2) ingest public corpus …")
@@ -48,7 +52,12 @@ def main() -> int:
     q = _req(
         "POST",
         f"{base}/query?strategy=auto",
-        {"query": "How does SentinelRAG stop corpus poisoning in CI?"},
+        {
+            "query": (
+                "What ingest-time defenses and CI gates does SentinelRAG use "
+                "against corpus poisoning?"
+            )
+        },
     )
     answer = str(q.get("answer", ""))[:500]
     print(f"   answer: {answer}")

@@ -113,7 +113,7 @@ class OpenAIProvider(LLMProvider):
 
 
 class AzureOpenAIProvider(LLMProvider):
-    """Azure OpenAI — requires endpoint, deployment, and key in settings."""
+    """Optional Azure OpenAI stub — live demo track uses Gemini only."""
 
     name: ProviderName = "azure_openai"
 

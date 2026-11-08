@@ -52,7 +52,7 @@ def test_get_llm_gemini_requires_key() -> None:
         get_llm(
             Settings(
                 llm_provider="gemini",
-                llm_model="gemini-2.0-flash",
+                llm_model="gemini-2.5-flash",
                 gemini_api_key=None,
                 _env_file=None,
             )
@@ -74,7 +74,7 @@ def test_get_llm_gemini_factory() -> None:
     llm = get_llm(
         Settings(
             llm_provider="gemini",
-            llm_model="gemini-2.0-flash",
+            llm_model="gemini-2.5-flash",
             gemini_api_key="test-key",
             _env_file=None,
         )
@@ -84,6 +84,7 @@ def test_get_llm_gemini_factory() -> None:
 
 def test_gemini_complete_parses_response() -> None:
     mock_response = MagicMock()
+    mock_response.is_error = False
     mock_response.raise_for_status = MagicMock()
     mock_response.json.return_value = {
         "candidates": [{"content": {"parts": [{"text": "grounded answer"}]}}]
@@ -92,7 +93,7 @@ def test_gemini_complete_parses_response() -> None:
     mock_client.post.return_value = mock_response
     mock_client.__enter__.return_value = mock_client
     mock_client.__exit__.return_value = False
-    llm = GeminiProvider("gemini-2.0-flash", "test-key")
+    llm = GeminiProvider("gemini-2.5-flash", "test-key")
     msgs = [
         Message(role="system", content="Be factual."),
         Message(role="user", content="What is SentinelRAG?"),

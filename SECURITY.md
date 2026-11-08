@@ -4,7 +4,8 @@
 
 | Version | Supported |
 |---------|-----------|
-| 0.1.x   | Yes       |
+| 0.2.x   | Yes       |
+| 0.1.x   | Security fixes only |
 
 ## Reporting a vulnerability
 
@@ -36,4 +37,4 @@ Out of scope (for now):
 
 - Never commit `.env` or API keys
 - Run `uv run python scripts/verify_repo_secrets.py` before pushing
-- See `docs/SECURITY_AUDIT.md` for the latest repo hygiene check
+- Prefer GitHub secret scanning on public remotes

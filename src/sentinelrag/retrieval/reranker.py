@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from functools import lru_cache
 
 from sentinelrag.ingest.schema import ChunkPayload
 
@@ -29,7 +30,9 @@ class MockReranker(Reranker):
         return sorted(scored, key=lambda x: -x[1])
 
 
+@lru_cache(maxsize=4)
 def build_reranker(model_name: str) -> Reranker:
+    """Build (and cache) a reranker. Real CEs are expensive to load — never rebuild per query."""
     if model_name == "mock-reranker":
         return MockReranker(model_name=model_name)
     try:
@@ -40,9 +43,12 @@ def build_reranker(model_name: str) -> Reranker:
 
     class _CEReranker(Reranker):
         def __init__(self) -> None:
+            self.model_name = model_name
             self._model = CrossEncoder(model_name)
 
         def score(self, query: str, chunks: list[ChunkPayload]) -> list[tuple[str, float]]:
+            if not chunks:
+                return []
             pairs = [[query, c.text] for c in chunks]
             raw = self._model.predict(pairs)
             scored = [(chunks[i].chunk_id, float(raw[i])) for i in range(len(chunks))]

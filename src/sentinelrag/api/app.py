@@ -38,6 +38,9 @@ class HealthResponse(BaseModel):
     version: str
     env: str
     llm_provider: str
+    llm_model: str
+    embedding_model: str
+    reranker_model: str
     index_ready: bool
 
 
@@ -105,6 +108,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             version=__version__,
             env=current.env,
             llm_provider=current.llm_provider,
+            llm_model=current.llm_model,
+            embedding_model=current.embedding_model,
+            reranker_model=current.reranker_model,
             index_ready=state.is_ready(),
         )
 

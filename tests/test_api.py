@@ -25,6 +25,9 @@ def test_health() -> None:
     body = resp.json()
     assert body["status"] == "ok"
     assert body["llm_provider"] == "mock"
+    assert body["llm_model"] == "mock-llm"
+    assert body["embedding_model"] == "mock-embedder"
+    assert body["reranker_model"] == "mock-reranker"
     assert body["env"] == "test"
     assert "version" in body
     assert "index_ready" in body

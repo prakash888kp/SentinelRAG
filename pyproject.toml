@@ -1,7 +1,7 @@
 [project]
 name = "sentinelrag"
 version = "0.2.0"
-description = "Triple-gate adaptive RAG: CI gates for retrieval, answer quality, and ingest poison defenses"
+description = "RAG supply-chain CI: retrieval regression, answer grounding, and corpus poison/hygiene gates with evidence, JUnit, and SARIF"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
@@ -9,22 +9,39 @@ authors = [{ name = "PRAKASH KUMAR K", email = "prakash888kp@users.noreply.githu
 keywords = [
   "rag",
   "retrieval-augmented-generation",
-  "evaluation",
+  "rag-evaluation",
+  "retrieval-regression",
+  "llm-security",
+  "corpus-poisoning",
+  "hygiene-scan",
   "ci",
+  "github-actions",
+  "sarif",
+  "junit",
   "red-team",
   "security",
   "qdrant",
   "fastapi",
+  "hybrid-search",
+  "cross-encoder",
+  "gemini",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
+  "Environment :: Console",
   "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
   "Topic :: Security",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Testing",
+  "Typing :: Typed",
 ]
 dependencies = [
   "fastapi>=0.115.0",
@@ -113,7 +130,3 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
-[dependency-groups]
-dev = [
-    "paramiko>=5.1.0",
-]

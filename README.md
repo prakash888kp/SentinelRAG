@@ -3,12 +3,17 @@
 [![CI](https://github.com/prakash888kp/SentinelRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/ci.yml)
 [![Supply-chain gate](https://github.com/prakash888kp/SentinelRAG/actions/workflows/supply-chain-gate.yml/badge.svg)](https://github.com/prakash888kp/SentinelRAG/actions/workflows/supply-chain-gate.yml)
 [![PyPI](https://img.shields.io/pypi/v/sentinelrag.svg)](https://pypi.org/project/sentinelrag/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**RAG supply-chain CI** — fail builds when **retrieval**, **grounded answers**, or **poison / hygiene defenses** regress. Includes an adaptive FastAPI + Qdrant reference stack.
+**RAG evaluation and security CI for retrieval-augmented generation.**  
+Fail the build when **retrieval recall**, **answer grounding**, or **corpus poison / hygiene defenses** regress — with evidence, JUnit, and SARIF. Ships an adaptive FastAPI + Qdrant reference stack.
+
+Searchable keywords: RAG CI · retrieval regression testing · LLM security · corpus poisoning · hygiene scan · hybrid BM25 · cross-encoder rerank · agentic RAG · GitHub Actions gate.
 
 **Author:** PRAKASH KUMAR K ([@prakash888kp](https://github.com/prakash888kp)) · **Support:** [GitHub Issues](https://github.com/prakash888kp/SentinelRAG/issues)
 
-Narrative: [docs/STORY.md](docs/STORY.md) · Security map: [docs/OWASP_RAG_CI_MAP.md](docs/OWASP_RAG_CI_MAP.md)
+[Story](docs/STORY.md) · [Demo](docs/DEMO.md) · [Phases](docs/PHASES.md) · [OWASP map](docs/OWASP_RAG_CI_MAP.md) · [Comparison](docs/COMPARISON.md)
 
 ---
 
@@ -20,7 +25,7 @@ pip install sentinelrag
 uv add sentinelrag
 ```
 
-Dev clone:
+From source:
 
 ```bash
 git clone https://github.com/prakash888kp/SentinelRAG.git
@@ -42,16 +47,15 @@ uv run sentinelrag-gate demo-poison
 uv run sentinelrag-gate scan data/public_corpus --fail-on high
 ```
 
-### Live 30–60s demo (Gemini + real `bge-small` embedder)
+### Live 30–60s demo (Gemini + real embedder + cross-encoder)
 
 See **[docs/DEMO.md](docs/DEMO.md)**. After Qdrant + API are warm:
 
 ```bash
 uv sync --extra ml
+uv run python scripts/warmup_live_models.py   # once
 uv run python scripts/demo_60s.py
 ```
-
-Azure full track (real benchmarks + e2e on the VM): `uv run python scripts/azure_real_model_track.py`
 
 | Command | What it does |
 |---------|----------------|
@@ -75,7 +79,7 @@ Artifacts: `.sentinelrag/gate/` · Policy: `config/gate_policy.yaml`
 
 ## What problem this solves
 
-Teams on Reddit / LocalLLaMA / RAG ops repeatedly ask for:
+Teams building RAG systems need:
 
 1. **Golden-set retrieval regression** (recall / hit-rate / MRR) separate from generation  
 2. **CI that fails on quality drops** vs a committed baseline  
@@ -103,14 +107,14 @@ flowchart LR
 
 **CI / mock** (`benchmarks/phase1_retrieval.json`, seed 42): hybrid recall@k **1.0**
 
-**Azure real embedder** (`benchmarks/phase1_retrieval_real.json`, `bge-small-en-v1.5`):
+**Real embedder** (`benchmarks/phase1_retrieval_real.json`, `bge-small-en-v1.5`):
 
 | Corpus | naive recall@5 | hybrid recall@5 |
 |--------|---------------:|----------------:|
 | mini | **1.0** | **1.0** |
 | public (20 docs) | **1.0** | **1.0** |
 
-Also: poison v1, hygiene, provenance, phase2 mock judges in CI. Live demo uses **Gemini 2.5 Flash** + real embeddings (see `docs/DEMO.md`).  
+Also: poison v1, hygiene, provenance, phase2 mock judges in CI. Live path: **Gemini 2.5 Flash** + `bge-small` + MiniLM cross-encoder ([DEMO](docs/DEMO.md)).
 
 ---
 
@@ -125,7 +129,7 @@ src/sentinelrag/
   eval/          metrics, judges, golden I/O, latency
   redteam/       attacks, defenses, post-retrieval, harness
   gate/          evidence, policy, CLI, SARIF/JUnit
-  generation/    MockLLM + providers
+  generation/    MockLLM + Gemini (live)
   observability/ cost + OTel
 benchmarks/      reproducible JSON + plots
 config/          eval_thresholds.yaml · gate_policy.yaml
@@ -144,11 +148,13 @@ curl -s -X POST http://127.0.0.1:8000/query \
   -d '{"query":"What is triple-gate RAG?", "strategy":"auto"}'
 ```
 
+Host bootstrap (Docker Engine on a fresh Ubuntu box): `scripts/bootstrap-docker-host.sh`
+
 ---
 
 ## Docs
 
-[CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [CHANGELOG](CHANGELOG.md) · [COMPARISON](docs/COMPARISON.md) · [POISON_BENCHMARK_v1](docs/POISON_BENCHMARK_v1.md)
+[CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [CHANGELOG](CHANGELOG.md) · [PHASES](docs/PHASES.md) · [DEMO](docs/DEMO.md) · [COMPARISON](docs/COMPARISON.md) · [POISON_BENCHMARK_v1](docs/POISON_BENCHMARK_v1.md)
 
 ## License
 

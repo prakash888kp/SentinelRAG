@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Phase 1 retrieval with real sentence-transformers embedder (not for CI)."""
+"""Phase 1 retrieval with real sentence-transformers embedder (+ optional CE).
+
+Not for CI. Set SENTINELRAG_RERANKER_MODEL to a CrossEncoder id for full stack.
+Default live stack uses cross-encoder/ms-marco-MiniLM-L-6-v2.
+"""
 
 from __future__ import annotations
 
@@ -7,15 +11,17 @@ import json
 import os
 
 from sentinelrag.eval.phase1_retrieval import run_benchmark
+from sentinelrag.live_models import LIVE_EMBEDDING_MODEL, LIVE_RERANKER_MODEL
 from sentinelrag.paths import project_root, public_corpus_dir, public_qrels_path
 from sentinelrag.settings import settings_without_dotenv
 
 
 def main() -> int:
-    model = os.environ.get("SENTINELRAG_EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+    model = os.environ.get("SENTINELRAG_EMBEDDING_MODEL", LIVE_EMBEDDING_MODEL)
+    reranker = os.environ.get("SENTINELRAG_RERANKER_MODEL", LIVE_RERANKER_MODEL)
     cfg = settings_without_dotenv(
         embedding_model=model,
-        reranker_model="mock-reranker",
+        reranker_model=reranker,
         vector_store_backend="memory",
     )
     root = project_root()
@@ -26,9 +32,9 @@ def main() -> int:
         qrels_path=public_qrels_path(),
     )
     out = {
-        "mode": "real_embedder",
+        "mode": "real_embedder_ce" if reranker != "mock-reranker" else "real_embedder",
         "embedding_model": model,
-        "reranker_model": "mock-reranker",
+        "reranker_model": reranker,
         "mini_corpus": mini,
         "public_corpus": public,
     }
