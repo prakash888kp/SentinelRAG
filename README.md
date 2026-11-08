@@ -99,14 +99,18 @@ flowchart LR
 
 ---
 
-## Results (mock, seed 42)
+## Results
 
-Committed under `benchmarks/`:
+**CI / mock** (`benchmarks/phase1_retrieval.json`, seed 42): hybrid recall@k **1.0**
 
-- Mini + public corpus: hybrid **recall@k = 1.0** (also hit-rate + latency)  
-- Phase 2 mock judges: faithfulness / relevance gated  
-- Poison v1 + red-team defense probes  
-- Hygiene report + corpus SHA-256 manifest  
+**Azure real embedder** (`benchmarks/phase1_retrieval_real.json`, `bge-small-en-v1.5`):
+
+| Corpus | naive recall@5 | hybrid recall@5 |
+|--------|---------------:|----------------:|
+| mini | **1.0** | **1.0** |
+| public (20 docs) | **1.0** | **1.0** |
+
+Also: poison v1, hygiene, provenance, phase2 mock judges in CI. Live demo uses **Gemini 2.5 Flash** + real embeddings (see `docs/DEMO.md`).  
 
 ---
 

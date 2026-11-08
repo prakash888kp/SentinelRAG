@@ -86,9 +86,14 @@ class GeminiProvider(LLMProvider):
             f"https://generativelanguage.googleapis.com/v1beta/models"
             f"/{self.model}:generateContent"
         )
+        headers = {"x-goog-api-key": self._api_key, "Content-Type": "application/json"}
         with httpx.Client(timeout=90.0) as client:
-            response = client.post(url, params={"key": self._api_key}, json=body)
-            response.raise_for_status()
+            response = client.post(url, headers=headers, json=body)
+            if response.is_error:
+                # Never include request URL (may contain secrets in older clients).
+                detail = response.text[:300]
+                msg = f"Gemini HTTP {response.status_code} for model={self.model}: {detail}"
+                raise RuntimeError(msg)
             payload = response.json()
 
         try:

@@ -49,12 +49,23 @@ pytest: 47+ passed, coverage ~85%
 GitHub Actions: ci, eval-gate, redteam-gate green on master
 ```
 
+## Azure real-model track (locked)
+
+| Item | Choice |
+|------|--------|
+| LLM | **Gemini** `gemini-2.5-flash` (2.0-flash shut down) |
+| Embedder | `BAAI/bge-small-en-v1.5` via `--extra ml` |
+| Reranker (demo) | `mock-reranker` (fast 60s); optional CE later |
+| Vector | Qdrant on VM Compose |
+| Demo | `scripts/demo_60s.py` (~11s warm on Azure) |
+| Real bench | `benchmarks/phase1_retrieval_real.json` |
+
 ## Next action
 
-1. Maintainer reviews OSS launch pack while repo stays **private**
-2. Say **ok to public** → enable secret scanning, publish PyPI (`docs/PUBLISHING.md`), launch posts
-3. Optional assets: demo GIF, logo (deferred)
+1. Rotate Gemini key if it ever appeared in logs/URLs
+2. Say **ok to public** when ready
+3. Deallocate VM when idle
 
 ## Session log
 
-- 2026-11-08: OSS launch pack — public corpus, community files, secret audit, README positioning.
+- 2026-11-08: Azure real-model track — ml extras, real bge recall@1.0, Gemini 2.5 demo 11s, gate+pytest on VM.

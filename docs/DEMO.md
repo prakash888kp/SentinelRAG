@@ -17,7 +17,7 @@ SENTINELRAG_QDRANT_URL=http://127.0.0.1:6333 \
 SENTINELRAG_EMBEDDING_MODEL=BAAI/bge-small-en-v1.5 \
 SENTINELRAG_RERANKER_MODEL=mock-reranker \
 SENTINELRAG_LLM_PROVIDER=gemini \
-SENTINELRAG_LLM_MODEL=gemini-2.0-flash \
+SENTINELRAG_LLM_MODEL=gemini-2.5-flash \
 uv run uvicorn sentinelrag.api.app:app --host 0.0.0.0 --port 8000
 ```
 
