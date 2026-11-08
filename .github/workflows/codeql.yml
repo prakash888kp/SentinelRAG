@@ -19,14 +19,14 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@v4
         with:
           languages: python
-      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/autobuild@v4
       - name: Perform CodeQL analysis
         id: analyze
         continue-on-error: true
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           # Private repos without Advanced Security cannot upload to code scanning.
           upload: never
