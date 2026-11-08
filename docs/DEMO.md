@@ -1,6 +1,6 @@
 # Live preview — reproduce what the README shows
 
-The README GIF ([assets/demo-live.gif](assets/demo-live.gif)) is a **product live-preview** of the warm API path:
+The README shows a **static live preview** ([assets/live-preview.png](assets/live-preview.png)) plus an animated walkthrough ([assets/demo-live.gif](assets/demo-live.gif)) of the warm API path:
 
 1. `/health` with Gemini + real embedder + cross-encoder  
 2. `POST /query?strategy=auto` grounded answer + citations  

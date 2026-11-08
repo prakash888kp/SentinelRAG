@@ -8,4 +8,4 @@
 - **Adaptive stack** — router, agentic hops, Pareto cost/latency  
 - **Original public corpus** — 20 docs for demos without copyrighted text  
 
-Screenshots / recording: [docs/assets/demo-live.gif](assets/demo-live.gif).
+Screenshots: [live-preview.png](assets/live-preview.png) · [demo-live.gif](assets/demo-live.gif) · [pipeline.png](assets/pipeline.png).

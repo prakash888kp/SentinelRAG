@@ -1,0 +1,13 @@
+SentinelRAG
+Copyright (c) 2026 PRAKASH KUMAR K
+
+This product includes software developed by PRAKASH KUMAR K and contributors.
+Licensed under the MIT License — see LICENSE.
+
+Third-party components (installed via package dependencies) retain their own
+licenses (for example FastAPI/BSD-style, Qdrant client, Pydantic, etc.).
+Review each dependency's license before redistribution in proprietary products.
+
+The public corpus under data/public_corpus/ and data/mini_corpus/ is original
+documentation written for this project and covered by the same MIT license
+unless a file states otherwise.
