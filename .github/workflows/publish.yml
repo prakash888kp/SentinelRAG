@@ -1,21 +1,27 @@
 name: publish
 
-# CD: build + upload to PyPI when a GitHub Release is published.
-# One-time setup on PyPI → project Settings → Publishing → Trusted publisher:
-#   Owner: prakash888kp
-#   Repository: SentinelRAG
-#   Workflow: publish.yml
-#   Environment: pypi
+# Future flow:
+#   1. Bump version in pyproject.toml + src/sentinelrag/__init__.py (+ CHANGELOG)
+#   2. Merge to main
+#   3. git tag vX.Y.Z && git push origin vX.Y.Z
+#   → this workflow verifies version, builds, publishes to PyPI, creates the GitHub Release
+#
+# PyPI trusted publisher (already configured):
+#   Owner: prakash888kp · Repo: SentinelRAG · Workflow: publish.yml · Env: pypi
 
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Build only (skip PyPI upload)"
+        description: "Build only (skip PyPI + GitHub Release)"
         type: boolean
         default: true
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -23,30 +29,75 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
+
+      - name: Resolve version + verify tag match
+        id: meta
+        run: |
+          set -euo pipefail
+          VERSION=$(python3 - <<'PY'
+          import tomllib
+          print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])
+          PY
+          INIT=$(python3 - <<'PY'
+          import pathlib, re
+          text = pathlib.Path("src/sentinelrag/__init__.py").read_text(encoding="utf-8")
+          m = re.search(r'__version__\s*=\s*"([^"]+)"', text)
+          print(m.group(1) if m else "")
+          PY
+          echo "pyproject=$VERSION init=$INIT"
+          if [[ "$VERSION" != "$INIT" ]]; then
+            echo "::error::pyproject.toml ($VERSION) != __init__.py ($INIT)"
+            exit 1
+          fi
+
+          TAG=""
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            TAG="${GITHUB_REF_NAME}"
+            EXPECTED="v${VERSION}"
+            if [[ "$TAG" != "$EXPECTED" ]]; then
+              echo "::error::Git tag is $TAG but package version is $VERSION (expected $EXPECTED)"
+              exit 1
+            fi
+          else
+            TAG="v${VERSION}"
+          fi
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
       - name: Build sdist + wheel
         run: |
           uv sync --extra dev
           uv build
           ls -la dist/
+          # Guard: built artifacts must match declared version
+          ls dist/ | grep -F "sentinelrag-${{ steps.meta.outputs.version }}"
+
       - uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
 
-  publish:
+  publish-pypi:
     needs: build
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.dry_run == false)
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.dry_run == false)
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/sentinelrag/
+      url: https://pypi.org/project/sentinelrag/${{ needs.build.outputs.version }}/
     permissions:
       id-token: write
     steps:
@@ -56,3 +107,45 @@ jobs:
           path: dist/
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    needs: [build, publish-pypi]
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.dry_run == false)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.build.outputs.tag }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — uploading assets only"
+            gh release upload "$TAG" dist/* --clobber
+          else
+            NOTES=$(python3 - <<'PY'
+          from pathlib import Path
+          import os, re
+          version = os.environ["VERSION"]
+          text = Path("CHANGELOG.md").read_text(encoding="utf-8")
+          # Grab ## [version] section until next ##
+          pat = rf"## \[{re.escape(version)}\].*?\n(.*?)(?=\n## |\Z)"
+          m = re.search(pat, text, flags=re.S)
+          body = m.group(1).strip() if m else f"Release {version}"
+          print(body)
+          PY
+            )
+            gh release create "$TAG" dist/* \
+              --title "v${VERSION}" \
+              --notes "$NOTES"
+          fi

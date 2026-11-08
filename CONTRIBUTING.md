@@ -30,6 +30,24 @@ Regenerate and commit `benchmarks/*.json` when behavior changes.
 - No secrets in git (`.env` ignored)
 - Prefer focused PRs with tests
 
+## Releases (maintainers)
+
+Automated CD (`.github/workflows/publish.yml`):
+
+1. Bump `version` in `pyproject.toml` and `src/sentinelrag/__init__.py`
+2. Update `CHANGELOG.md`
+3. Merge to `main`
+4. Tag and push:
+
+```bash
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
+
+That single tag push: verifies version ↔ tag, builds the wheel, publishes to **PyPI**, and creates the **GitHub Release** (notes from CHANGELOG).
+
+Dry-run build only: Actions → **publish** → Run workflow → dry_run = true.
+
 ## Community
 
 - **Maintainer:** PRAKASH KUMAR K ([@prakash888kp](https://github.com/prakash888kp))
