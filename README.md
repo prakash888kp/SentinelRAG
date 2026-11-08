@@ -31,7 +31,9 @@ cp .env.example .env
 
 ---
 
-## Out of the box (no API keys)
+## Out of the box
+
+### Offline / CI (no API keys)
 
 ```bash
 uv run pytest
@@ -39,6 +41,17 @@ uv run sentinelrag-gate run --refresh
 uv run sentinelrag-gate demo-poison
 uv run sentinelrag-gate scan data/public_corpus --fail-on high
 ```
+
+### Live 30–60s demo (Gemini + real `bge-small` embedder)
+
+See **[docs/DEMO.md](docs/DEMO.md)**. After Qdrant + API are warm:
+
+```bash
+uv sync --extra ml
+uv run python scripts/demo_60s.py
+```
+
+Azure full track (real benchmarks + e2e on the VM): `uv run python scripts/azure_real_model_track.py`
 
 | Command | What it does |
 |---------|----------------|
