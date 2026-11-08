@@ -6,7 +6,7 @@
 
 - README **live demo GIF** + SVG hero; EvalForge-style capability matrix.
 - `sentinelrag-gate import` for **promptfoo / Ragas / DeepEval** score files.
-- Docs suite: ARCHITECTURE, BENCHMARK, METRICS, CI_COOKBOOK, DEPLOYMENT, ECOSYSTEM, INTEROPERABILITY, CASE_STUDY, OSS_READINESS, PORTFOLIO, RELEASE_CHECKLIST, integrations/*, superpowers/plans.
+- Docs suite: ARCHITECTURE, BENCHMARK, METRICS, CI_COOKBOOK, DEPLOYMENT, ECOSYSTEM, INTEROPERABILITY, CASE_STUDY, integrations/*.
 - JSON Schemas under `schemas/`; richer `examples/` fixtures.
 
 ## [0.2.0] — 2026-11-08
