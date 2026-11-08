@@ -12,7 +12,7 @@ Adaptive, attack-tested, eval-gated RAG platform proving: ADAPTIVE (router/Paret
 | Decision | Choice |
 |----------|--------|
 | Primary host | **Azure-first** (not local OMEN as primary) |
-| Budget | ~$100 Azure credits (portal showed ₹19,045.75 remaining as of 2026-11-08; expires ~2026-12-07) |
+| Budget | Azure credits (~₹19,045.75 remaining as of 2026-11-08; expires ~2026-12-07) |
 | Runtime topology | Stop/start Ubuntu VM + Docker Compose (Qdrant + API) |
 | Package/tooling | Python 3.11+, **uv**, FastAPI, Pydantic v2, pytest, ruff, mypy strict |
 | Vector store | **Qdrant** (Compose on VM) |
@@ -29,20 +29,20 @@ Adaptive, attack-tested, eval-gated RAG platform proving: ADAPTIVE (router/Paret
                                ├── Docker Compose
                                │     ├── qdrant
                                │     └── sentinelrag-api
-                               └── /opt/sentinelrag (code mirror)
+                               └── ~/sentinelrag (code mirror)
 ```
 
-### Resources (fill as created)
+### Resources (as of Phase 0 end)
 
 | Resource | Value | Notes |
 |----------|-------|-------|
-| Subscription | (portal default / student+credits) | Check portal |
-| Resource group | `rg-sentinelrag` | Create/reuse |
-| Region | TBD at create time | Prefer Central India / South India / East US |
-| VM name | `vm-sentinelrag` | Ubuntu 22.04/24.04, B2s-class |
-| Public IP | TBD | Document when Running |
+| Subscription | Azure subscription 1 | Portal account `prakash888kp@outlook.com` |
+| Resource group | `rg-sentinelrag` | **Not created yet** — finish in portal |
+| Region | Prefer Central/South India; East US tried | D2s_v3 unavailable in eastus for this sub |
+| VM name | `vm-sentinelrag` | Target Ubuntu 24.04, B2s-class |
+| Public IP | — | Fill when Running |
 | NSG | SSH 22 inbound | Restrict later if possible |
-| SSH user | `azureuser` (typical) | Confirm after create |
+| SSH user | `azureuser` | Typical portal default |
 | SSH private key path | `C:\Users\praka\.ssh\sentinelrag_azure` (outside git) | Never commit |
 | Connect | `ssh -i ~/.ssh/sentinelrag_azure azureuser@<PUBLIC_IP>` | |
 | Cost control | **Deallocate** VM when idle | Stop ≠ deallocate; disk still bills |
@@ -50,36 +50,62 @@ Adaptive, attack-tested, eval-gated RAG platform proving: ADAPTIVE (router/Paret
 ### Credentials locations (no secrets in repo)
 
 - Azure portal: Edge session (MFA as needed)
-- SSH private key: user `.ssh` only; `.gitignore` covers `*.pem`, `id_*`
+- SSH private key: user `.ssh` only; `.gitignore` covers keys
 - App secrets: `.env` on VM / local (from `.env.example`); never committed
+
+### Azure bootstrap status
+
+**BLOCKED for agent computer-use.** Portal Create VM Basics opened with Ubuntu 24.04 selected; size picker / Create new RG / Continue clicks did not stick after repeated attempts. No `az` CLI on PATH. See `docs/azure/RUNBOOK.md` for the exact human finish steps + `vm-bootstrap.sh`.
 
 ## Phase status
 
 | Phase | Status |
 |-------|--------|
-| **0** Scaffold, MockLLM, `/health` `/query`, Compose, CI skeleton, ADR-001 | **IN PROGRESS** |
-| 1 Ingest + retrieval + first table | NOT STARTED — wait for user **continue** |
+| **0** Scaffold, MockLLM, `/health` `/query`, Compose, CI skeleton, ADR-001 | **COMPLETE locally** (tests green) |
+| 1 Ingest + retrieval + first table | **NOT STARTED** — wait for user **continue** |
 | 2+ | NOT STARTED |
+
+## What was built (Phase 0)
+
+- Repo at `D:\AI Engg\SentinelRAG` (Cursor-visible mirror)
+- Package layout: ingest/retrieval/router/generation/eval/redteam/observability/api + benchmarks/docs
+- Settings (Pydantic v2), MockLLM + provider sketches, FastAPI hello path
+- `docker-compose.yml` (Qdrant + API), Dockerfile, `.env.example`, MIT license
+- GitHub Actions: `ci.yml` (ruff/mypy/pytest), `eval.yml` / `redteam.yml` placeholders (pass)
+- ADR-001 + Azure runbook + `vm-bootstrap.sh`
+- Local git commits (7) on `master` — **not pushed**
+
+## Test results (local Windows, uv + CPython 3.14)
+
+```
+ruff: pass
+mypy strict (src/sentinelrag): pass
+pytest: 11 passed, coverage ~95%
+```
+
+Docker daemon was not confirmed running during Phase 0; Compose verification deferred to Azure VM (or local Docker Desktop once up).
 
 ## Workspace paths
 
-- Cursor-visible mirror: `D:\AI Engg\SentinelRAG`
-- Personal agent store copy: `...\u211987363\files\SentinelRAG_CHAT_MEMORY.md`
+- Cursor mirror: `D:\AI Engg\SentinelRAG`
+- Personal agent store: `...\u211987363\files\SentinelRAG_CHAT_MEMORY.md`
 - Azure runbooks: `docs/azure/`
+
+## Open risks
+
+1. Azure VM not provisioned — human must finish Create VM (B2s + RG) per RUNBOOK.
+2. Credit SKU/region availability (D2s_v3 blocked in East US; B2s may need region hunting).
+3. Idle VM burns credits if not **deallocated**.
+4. No `az` CLI installed — portal-only until winget install.
+5. Computer-use unreliable on Azure SPA primary buttons.
+6. Local Docker daemon may be stopped — Compose demo needs Docker or the Azure VM.
 
 ## Next action
 
-1. Finish Azure RG + cheap Ubuntu VM (or document blocker).
-2. Complete Phase 0 repo + green tests.
-3. **STOP** — wait for user message `continue` before Phase 1.
+**STOPPED — waiting for user `continue` for Phase 1.**
 
-## Open risks (living)
-
-- Azure portal computer-use / MFA may block VM create.
-- Idle VM burns credits if not deallocated.
-- B2s availability varies by region under student/credit SKUs.
-- SSH from agent shell may be restricted; fallback: `docs/azure/vm-bootstrap.sh` for user.
+Before Phase 1 (optional but recommended): finish Azure VM + `vm-bootstrap.sh` + `docker compose up` per RUNBOOK, then update this file with public IP.
 
 ## Session log
 
-- 2026-11-08: Locked Azure-first; Phase 0 only; memory docs created; Azure portal confirmed open in Edge with credits.
+- 2026-11-08: Locked Azure-first; Phase 0 only; memory docs; portal confirmed with credits; computer-use Create VM partially reached Basics but size/RG actions blocked; Phase 0 repo + tests completed offline; no push.
