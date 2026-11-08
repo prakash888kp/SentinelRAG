@@ -112,3 +112,8 @@ exclude_lines = [
   "pragma: no cover",
   "if TYPE_CHECKING:",
 ]
+
+[dependency-groups]
+dev = [
+    "paramiko>=5.1.0",
+]
