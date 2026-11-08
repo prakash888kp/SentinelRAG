@@ -26,32 +26,17 @@ Foreign eval scores (promptfoo, Ragas, DeepEval) can feed the same evidence sche
 ![Pipeline](docs/assets/pipeline.png)
 
 ```mermaid
-flowchart TB
-  subgraph before_merge [Before the PR merges]
-    A[Corpus change] --> B{Retrieve OK?}
-    B -->|no| X[Fail CI]
-    B -->|yes| C{Grounded OK?}
-    C -->|no| X
-    C -->|yes| D{Poison / hygiene OK?}
-    D -->|no| X
-    D -->|yes| E[Attach evidence · JUnit · SARIF]
-  end
-```
-
-The **gate does not need** Gemini, a GPU, or Qdrant. The FastAPI app is there when you want a live stack with citations.
-
-```mermaid
 flowchart LR
-  subgraph live [Optional live stack]
-    API["/health /ingest /query"] --> V[(Qdrant)]
-    API --> M[bge-small + MiniLM]
-    API --> G[Gemini]
-  end
-  subgraph ci [Always-on CI]
-    CLI[sentinelrag-gate] --> OUT[.sentinelrag/gate/]
-  end
+  A[Corpus change] --> R{Retrieve}
+  R -->|pass| G{Ground}
+  R -->|fail| X[Fail CI]
+  G -->|pass| D{Defend}
+  G -->|fail| X
+  D -->|pass| E[Evidence · JUnit · SARIF]
+  D -->|fail| X
 ```
 
+Gate runs **offline** (no Gemini / GPU / Qdrant required). Optional live stack: FastAPI + Qdrant + bge-small + Gemini for citations.
 ---
 
 ## See it query a corpus
