@@ -32,7 +32,7 @@ jobs:
           upload: never
       - name: Upload SARIF artifact (best-effort)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: codeql-python-sarif
           path: |

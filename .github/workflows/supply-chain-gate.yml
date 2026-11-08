@@ -18,7 +18,7 @@ jobs:
       - run: uv sync --extra dev
       - run: uv run sentinelrag-gate run --refresh
       - name: Upload gate artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sentinelrag-gate
           path: .sentinelrag/gate/
