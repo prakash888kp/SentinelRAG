@@ -16,3 +16,11 @@ def mini_corpus_dir() -> Path:
 
 def mini_qrels_path() -> Path:
     return project_root() / "data" / "mini_qrels.json"
+
+
+def golden_dataset_path() -> Path:
+    return project_root() / "data" / "golden_dataset.json"
+
+
+def judge_calibration_path() -> Path:
+    return project_root() / "data" / "judge_calibration.json"

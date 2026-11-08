@@ -1,0 +1,8 @@
+version: v1
+created: "2026-11-08"
+prompts:
+  faithfulness: faithfulness.txt
+  relevance: relevance.txt
+description: >
+  Judges score 0.0-1.0 with a one-line rationale. JSON-only model output:
+  {"score": <float>, "reason": "<string>"}

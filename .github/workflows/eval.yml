@@ -6,10 +6,4 @@ on:
 
 jobs:
   eval-gate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Phase 0 placeholder
-        run: |
-          echo "Eval gate is wired but thresholds are not enforced until Phase 2."
-          echo "PASS"
+    uses: ./.github/workflows/eval-gate.yml

@@ -4,6 +4,7 @@ on:
   push:
     branches: [master, main]
   pull_request:
+  workflow_call:
 
 jobs:
   phase1-retrieval:
@@ -13,4 +14,5 @@ jobs:
       - uses: astral-sh/setup-uv@v4
       - run: uv sync --extra dev
       - run: uv run python benchmarks/run_phase1_retrieval.py
+      - run: uv run python benchmarks/run_phase2_eval.py
       - run: uv run python scripts/check_eval_gate.py

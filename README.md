@@ -64,5 +64,18 @@ Settings knobs include `SENTINELRAG_RETRIEVAL_TOP_K`, `SENTINELRAG_HYBRID_ALPHA`
 | Phase | Status |
 |-------|--------|
 | 0 Scaffold + hello query | **Done locally** — Azure VM pending human finish |
-| 1 Mini corpus + hybrid retrieval | **Done** — CI uses mock embedder; optional real embedder via `ml` extra |
-| 2+ | Eval gates, router, red team (planned) |
+| 1 Mini corpus + hybrid retrieval | **Done** — `benchmarks/phase1_retrieval.json` |
+| 2 Golden set + LLM judge + CI gate | **Done** — `benchmarks/phase2_eval.json`, `POST /eval/run` |
+| 3+ | Agentic retrieval, router, red team (planned) |
+
+## Phase 2 — eval harness
+
+- `data/golden_dataset.json` — seeded single/multi-hop items (`scripts/generate_golden_dataset.py`).
+- Versioned judges under `src/sentinelrag/eval/judges/v1/`.
+- `data/judge_calibration.json` — human labels for agreement reporting (MockJudge in CI).
+- CI: `eval-gate` runs Phase 1 + Phase 2 and enforces `config/eval_thresholds.yaml`.
+
+```bash
+uv run python benchmarks/run_phase2_eval.py
+uv run python scripts/check_eval_gate.py
+```

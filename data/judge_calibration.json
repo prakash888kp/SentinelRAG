@@ -1,0 +1,41 @@
+{
+  "judge_prompt_version": "v1",
+  "note": "Small human-labeled sample for judge agreement reporting (expand in Phase 2+).",
+  "samples": [
+    {
+      "id": "cal-1",
+      "context": "SentinelRAG is an eval-gated RAG platform with hybrid retrieval.",
+      "question": "What is SentinelRAG?",
+      "answer": "SentinelRAG is an eval-gated RAG platform.",
+      "human_faithfulness": 1.0
+    },
+    {
+      "id": "cal-2",
+      "context": "Hybrid retrieval fuses BM25 and dense vectors.",
+      "question": "How does hybrid retrieval work?",
+      "answer": "It only uses random forests.",
+      "human_faithfulness": 0.0
+    },
+    {
+      "id": "cal-3",
+      "context": "Phase 1 reports recall at k and MRR.",
+      "question": "Which retrieval metrics are reported?",
+      "answer": "Recall at k and MRR are reported in Phase 1.",
+      "human_faithfulness": 1.0
+    },
+    {
+      "id": "cal-4",
+      "context": "Poisoning filters are no-op in Phase 1.",
+      "question": "Are poisoning filters active in Phase 1?",
+      "answer": "Poisoning filters are no-op in Phase 1.",
+      "human_faithfulness": 1.0
+    },
+    {
+      "id": "cal-5",
+      "context": "MockLLM is used for offline CI.",
+      "question": "What LLM runs in CI?",
+      "answer": "GPT-4 runs in every CI job.",
+      "human_faithfulness": 0.0
+    }
+  ]
+}

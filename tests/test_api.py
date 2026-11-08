@@ -66,6 +66,15 @@ def test_query_naive_strategy() -> None:
     assert resp.json()["strategy"] == "naive"
 
 
+def test_eval_run_offline() -> None:
+    client = _client()
+    resp = client.post("/eval/run")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["n_golden_items"] == 5
+    assert body["judge_prompt_version"] == "v1"
+
+
 def test_query_rejects_empty() -> None:
     client = _client()
     resp = client.post("/query", json={"query": ""})

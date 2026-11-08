@@ -15,7 +15,8 @@ from sentinelrag.paths import mini_corpus_dir
 from sentinelrag.retrieval.embeddings import build_embedder
 from sentinelrag.retrieval.reranker import build_reranker
 from sentinelrag.retrieval.strategies import HybridRerankRetriever, NaiveRetriever, StrategyName
-from sentinelrag.settings import Settings, get_settings
+from sentinelrag.eval.phase2_rag import run_phase2_eval
+from sentinelrag.settings import Settings, get_settings, settings_without_dotenv
 
 HELLO_PASSAGE = {
     "doc_id": "doc-hello-001",
@@ -65,6 +66,14 @@ class QueryResponse(BaseModel):
     citations: list[Citation]
     strategy: str
     provider: str
+
+
+class EvalRunResponse(BaseModel):
+    mean_faithfulness: float
+    mean_relevance: float
+    mean_recall_at_k: float
+    judge_prompt_version: str
+    n_golden_items: int
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -180,6 +189,26 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             citations=citations,
             strategy=strategy,
             provider=llm.name,
+        )
+
+    @app.post("/eval/run", response_model=EvalRunResponse)
+    def eval_run() -> EvalRunResponse:
+        current = app.state.settings
+        assert isinstance(current, Settings)
+        offline = settings_without_dotenv(
+            llm_provider="mock",
+            embedding_model="mock-embedder",
+            reranker_model="mock-reranker",
+            vector_store_backend="memory",
+            env=current.env,
+        )
+        report = run_phase2_eval(settings=offline)
+        return EvalRunResponse(
+            mean_faithfulness=float(report["mean_faithfulness"]),
+            mean_relevance=float(report["mean_relevance"]),
+            mean_recall_at_k=float(report["mean_recall_at_k"]),
+            judge_prompt_version=str(report["judge_prompt_version"]),
+            n_golden_items=int(report["n_golden_items"]),
         )
 
     return app

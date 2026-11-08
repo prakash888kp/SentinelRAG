@@ -1,0 +1,17 @@
+You are evaluating whether an assistant answer is faithful to the provided context.
+
+Rules:
+- Score 1.0 only if every factual claim in the answer is supported by the context.
+- Score 0.0 if the answer contradicts the context or invents major facts not in the context.
+- Partial support → score between 0.0 and 1.0.
+
+Respond with JSON only: {"score": <number>, "reason": "<short explanation>"}
+
+Context:
+{context}
+
+Question:
+{question}
+
+Answer:
+{answer}

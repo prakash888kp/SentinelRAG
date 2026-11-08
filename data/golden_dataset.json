@@ -1,0 +1,42 @@
+{
+  "seed": 42,
+  "corpus_version": "mini_corpus_v1",
+  "generated_by": "scripts/generate_golden_dataset.py",
+  "items": [
+    {
+      "id": "sh-01",
+      "type": "single_hop",
+      "query": "What is SentinelRAG?",
+      "relevant_chunk_ids": ["01-overview::0"],
+      "expected_answer_contains": ["SentinelRAG", "eval"]
+    },
+    {
+      "id": "sh-02",
+      "type": "single_hop",
+      "query": "Name three chunking strategies in Phase 1.",
+      "relevant_chunk_ids": ["02-ingest::0"],
+      "expected_answer_contains": ["fixed", "semantic", "contextual"]
+    },
+    {
+      "id": "sh-03",
+      "type": "single_hop",
+      "query": "What does hybrid retrieval fuse?",
+      "relevant_chunk_ids": ["03-retrieval::0"],
+      "expected_answer_contains": ["BM25", "dense"]
+    },
+    {
+      "id": "mh-01",
+      "type": "multi_hop",
+      "query": "How do ingestion chunking choices and retrieval metrics connect in Phase 1 benchmarks?",
+      "relevant_chunk_ids": ["02-ingest::0", "04-eval::0"],
+      "expected_answer_contains": ["chunk", "recall", "MRR"]
+    },
+    {
+      "id": "mh-02",
+      "type": "multi_hop",
+      "query": "How do security defenses relate to eval CI gates?",
+      "relevant_chunk_ids": ["04-eval::0", "05-security::0"],
+      "expected_answer_contains": ["poison", "CI"]
+    }
+  ]
+}

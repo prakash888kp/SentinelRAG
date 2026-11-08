@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-11-08T08:01:33.945183+00:00",
+  "judge_prompt_version": "v1",
+  "llm_provider": "mock",
+  "embedding_model": "mock-embedder",
+  "golden_seed": 42,
+  "n_golden_items": 5,
+  "mean_recall_at_k": 1.0,
+  "mean_faithfulness": 0.8312,
+  "mean_relevance": 1.0,
+  "items": [
+    {
+      "item_id": "sh-01",
+      "item_type": "single_hop",
+      "recall_at_k": 1.0,
+      "faithfulness": 0.8447,
+      "relevance": 1.0
+    },
+    {
+      "item_id": "sh-02",
+      "item_type": "single_hop",
+      "recall_at_k": 1.0,
+      "faithfulness": 0.842,
+      "relevance": 1.0
+    },
+    {
+      "item_id": "sh-03",
+      "item_type": "single_hop",
+      "recall_at_k": 1.0,
+      "faithfulness": 0.7978,
+      "relevance": 1.0
+    },
+    {
+      "item_id": "mh-01",
+      "item_type": "multi_hop",
+      "recall_at_k": 1.0,
+      "faithfulness": 0.8327,
+      "relevance": 1.0
+    },
+    {
+      "item_id": "mh-02",
+      "item_type": "multi_hop",
+      "recall_at_k": 1.0,
+      "faithfulness": 0.8386,
+      "relevance": 1.0
+    }
+  ],
+  "phase1_hybrid_recall_at_k": 1.0,
+  "judge_agreement": {
+    "n_samples": 5,
+    "mean_absolute_error": 0.1953,
+    "within_0_2_rate": 0.6
+  }
+}

@@ -6,3 +6,9 @@ phase1_retrieval:
   naive:
     recall_at_k_min: 0.50
     mrr_min: 0.20
+
+phase2_rag:
+  mean_recall_at_k_min: 0.50
+  mean_faithfulness_min: 0.55
+  mean_relevance_min: 0.55
+  judge_agreement_within_0_2_min: 0.60
