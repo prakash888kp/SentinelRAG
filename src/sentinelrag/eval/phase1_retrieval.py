@@ -10,8 +10,9 @@ from pathlib import Path
 from typing import Any
 
 from sentinelrag.eval.metrics import hit_rate_at_k, mrr, recall_at_k
+from sentinelrag.gate.evidence import chunker_config_from_settings, resolve_app_revision
 from sentinelrag.ingest.pipeline import IndexState, ingest_corpus_dir
-from sentinelrag.paths import mini_corpus_dir, mini_qrels_path
+from sentinelrag.paths import mini_corpus_dir, mini_qrels_path, project_root
 from sentinelrag.retrieval.reranker import build_reranker
 from sentinelrag.retrieval.strategies import HybridRerankRetriever, NaiveRetriever, StrategyName
 from sentinelrag.settings import Settings, settings_without_dotenv
@@ -106,5 +107,7 @@ def run_benchmark(
         "seed": seed,
         "retrieval_top_k": k,
         "hybrid_alpha": cfg.hybrid_alpha,
+        "chunker_config": chunker_config_from_settings(cfg).to_dict(),
+        "app_revision": resolve_app_revision(root=project_root()),
         "results": rows,
     }

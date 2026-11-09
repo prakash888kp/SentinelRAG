@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.2] — 2026-11-09
+
+### Added
+
+- Evidence stamps: `app_revision`, `chunker_config`, `binding_mode` (`fixture` | `app`).
+- `sentinelrag-gate app-bound-check` — baseline chunker vs known harmful chunk-size; Retrieve must regress on text-remapped cases.
+- Composite Action inputs: `binding-mode`, `app-revision`, `app-bound-check`.
+- Example workflow: `examples/workflows/app-bound-retrieve.yml`.
+- CI cookbook section: fixture-bound vs app-bound (what a green gate actually protects).
+
 ## [0.2.1] — 2026-11-08
 
 ### Added

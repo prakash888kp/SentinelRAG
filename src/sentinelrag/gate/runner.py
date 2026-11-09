@@ -51,6 +51,12 @@ def load_baseline(path: Path) -> EvidenceBundle | None:
     data = json.loads(path.read_text(encoding="utf-8"))
     bundle = EvidenceBundle()
     bundle.schema = str(data.get("schema", bundle.schema))
+    bundle.commit = data.get("commit")
+    bundle.app_revision = data.get("app_revision")
+    chunker = data.get("chunker_config")
+    bundle.chunker_config = dict(chunker) if isinstance(chunker, dict) else None
+    mode = data.get("binding_mode", "fixture")
+    bundle.binding_mode = "app" if mode == "app" else "fixture"
     bundle.metrics = dict(data.get("metrics", {}))
     bundle.security_probes = dict(data.get("security_probes", {}))
     return bundle
@@ -62,6 +68,7 @@ def run_gate(
     out_dir: Path | None = None,
     baseline_path: Path | None = None,
     refresh: bool = False,
+    binding_mode: str = "fixture",
 ) -> GateResult:
     root = project_root()
     out = out_dir or (root / ".sentinelrag" / "gate")
@@ -71,6 +78,8 @@ def run_gate(
         refresh_benchmarks()
 
     evidence = collect_evidence(root=root)
+    if binding_mode == "app":
+        evidence.binding_mode = "app"
     baseline = load_baseline(baseline_path or (root / "benchmarks" / "baseline_evidence.json"))
     policy = load_policy(policy_path)
     outcome = evaluate_policy(evidence, policy, baseline=baseline)

@@ -1,5 +1,9 @@
 name: SentinelRAG supply-chain gate
-description: Run unified retrieval, quality, and poison gates with SARIF/JUnit outputs
+description: >
+  Run unified retrieval, quality, and poison gates with SARIF/JUnit outputs.
+  Default path is fixture-bound (bundled corpus + reference chunker). For
+  application chunker regressions, also run app-bound-check or wire an adapter
+  that indexes chunks produced by your changed code.
 inputs:
   policy:
     description: Path to gate_policy.yaml
@@ -11,6 +15,20 @@ inputs:
     default: benchmarks/baseline_evidence.json
   refresh:
     description: Regenerate benchmarks before gate
+    required: false
+    default: "false"
+  binding-mode:
+    description: Stamp evidence as fixture (bundled) or app (your pipeline)
+    required: false
+    default: fixture
+  app-revision:
+    description: Application revision to stamp into evidence.json (defaults to GITHUB_SHA)
+    required: false
+    default: ""
+  app-bound-check:
+    description: >
+      If true, also run sentinelrag-gate app-bound-check (baseline chunker vs
+      known harmful chunk-size; Retrieve must regress on remapped cases).
     required: false
     default: "false"
   working-directory:
@@ -36,7 +54,13 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         set -e
-        ARGS="run --policy ${{ inputs.policy }} --baseline ${{ inputs.baseline }}"
+        REV="${{ inputs.app-revision }}"
+        if [ -z "$REV" ]; then REV="${{ github.sha }}"; fi
+        export SENTINELRAG_APP_REVISION="$REV"
+        ARGS="run --policy ${{ inputs.policy }} --baseline ${{ inputs.baseline }} --binding-mode ${{ inputs.binding-mode }}"
         if [ "${{ inputs.refresh }}" = "true" ]; then ARGS="$ARGS --refresh"; fi
         uv run sentinelrag-gate $ARGS
+        if [ "${{ inputs.app-bound-check }}" = "true" ]; then
+          uv run sentinelrag-gate app-bound-check --out .sentinelrag/app-bound
+        fi
         echo "passed=true" >> "$GITHUB_OUTPUT"

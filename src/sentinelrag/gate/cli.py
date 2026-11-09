@@ -19,6 +19,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
         out_dir=Path(args.out) if args.out else None,
         baseline_path=Path(args.baseline) if args.baseline else None,
         refresh=args.refresh,
+        binding_mode=getattr(args, "binding_mode", "fixture"),
     )
     if not result.outcome.passed:
         for v in result.outcome.violations:
@@ -93,9 +94,44 @@ def _cmd_import(args: argparse.Namespace) -> int:
         )
     else:
         bundle = import_deepeval(src, source_revision=rev)
+    if rev:
+        bundle.app_revision = rev
     bundle.write_json(out)
     print(f"Wrote {out} ({bundle.schema}, {len(bundle.metrics)} metrics)")
     return 0
+
+
+def _cmd_app_bound_check(args: argparse.Namespace) -> int:
+    """Prove a known harmful chunk-size change fails Retrieve on remapped cases."""
+    from sentinelrag.eval.app_bound_retrieve import run_app_bound_chunk_regression
+
+    result = run_app_bound_chunk_regression(
+        baseline_chunk_size=args.baseline_chunk_size,
+        baseline_overlap=args.baseline_overlap,
+        harmful_chunk_size=args.harmful_chunk_size,
+        harmful_overlap=args.harmful_overlap,
+        min_drop=args.min_drop,
+    )
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    evidence = result.to_evidence()
+    evidence.write_json(out / "evidence.json")
+    print(result.message)
+    print(
+        json.dumps(
+            {
+                "passed": result.passed,
+                "baseline_recall": result.baseline_recall,
+                "harmful_recall": result.harmful_recall,
+                "app_revision": result.app_revision,
+                "baseline_chunker": result.baseline_chunker,
+                "harmful_chunker": result.harmful_chunker,
+                "evidence": str(out / "evidence.json"),
+            },
+            indent=2,
+        )
+    )
+    return 0 if result.passed else 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -107,6 +143,12 @@ def build_parser() -> argparse.ArgumentParser:
     run_p.add_argument("--baseline", default="benchmarks/baseline_evidence.json")
     run_p.add_argument("--out", default=".sentinelrag/gate")
     run_p.add_argument("--refresh", action="store_true", help="Regenerate benchmarks first")
+    run_p.add_argument(
+        "--binding-mode",
+        choices=["fixture", "app"],
+        default="fixture",
+        help="Stamp evidence as fixture-bound (default) or app-bound",
+    )
     run_p.set_defaults(func=_cmd_run)
 
     col = sub.add_parser("collect", help="Refresh benchmarks and anchor baseline evidence")
@@ -138,6 +180,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Ragas metric column (repeatable)",
     )
     imp.set_defaults(func=_cmd_import)
+
+    app = sub.add_parser(
+        "app-bound-check",
+        help=(
+            "Run unmodified chunker, then a known harmful chunk-size change; "
+            "require Retrieve to fail on the same (text-remapped) cases"
+        ),
+    )
+    app.add_argument("--baseline-chunk-size", type=int, default=500)
+    app.add_argument("--baseline-overlap", type=int, default=80)
+    app.add_argument("--harmful-chunk-size", type=int, default=64)
+    app.add_argument("--harmful-overlap", type=int, default=0)
+    app.add_argument("--min-drop", type=float, default=0.15)
+    app.add_argument("--out", default=".sentinelrag/app-bound")
+    app.set_defaults(func=_cmd_app_bound_check)
     return parser
 
 

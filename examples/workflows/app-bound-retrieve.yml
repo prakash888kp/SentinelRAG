@@ -1,0 +1,36 @@
+# Example: prove Retrieve fails after a known harmful chunk-size change.
+# Copy into .github/workflows/ or call steps from your own workflow.
+name: app-bound-retrieve
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  retrieve-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Sync
+        run: uv sync --extra dev
+      - name: Fixture gate (what bundled mocks protect)
+        run: uv run sentinelrag-gate run --binding-mode fixture
+        env:
+          SENTINELRAG_APP_REVISION: ${{ github.sha }}
+      - name: App-bound chunk-size regression
+        run: |
+          uv run sentinelrag-gate app-bound-check \
+            --baseline-chunk-size 500 \
+            --harmful-chunk-size 64 \
+            --min-drop 0.15 \
+            --out .sentinelrag/app-bound
+        env:
+          SENTINELRAG_APP_REVISION: ${{ github.sha }}
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentinelrag-app-bound-evidence
+          path: |
+            .sentinelrag/gate/evidence.json
+            .sentinelrag/app-bound/evidence.json

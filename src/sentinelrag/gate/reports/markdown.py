@@ -10,8 +10,19 @@ from sentinelrag.gate.policy import PolicyOutcome
 
 def render_summary(outcome: PolicyOutcome, evidence: EvidenceBundle) -> str:
     status = "PASSED" if outcome.passed else "FAILED"
+    chunker = evidence.chunker_config or {}
     lines = [
         f"# SentinelRAG supply-chain gate — {status}",
+        "",
+        "## Provenance",
+        f"- binding mode: **{evidence.binding_mode}**",
+        f"- app revision: **{evidence.app_revision or evidence.commit or 'unknown'}**",
+        (
+            "- chunker: "
+            f"**{chunker.get('strategy', '?')}** "
+            f"size={chunker.get('chunk_size', '?')} "
+            f"overlap={chunker.get('chunk_overlap', '?')}"
+        ),
         "",
         "## Retrieval",
         f"- hybrid recall@k: **{evidence.metrics.get('phase1_hybrid_recall_at_k')}**",

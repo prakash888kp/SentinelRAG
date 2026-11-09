@@ -1,6 +1,6 @@
 [project]
 name = "sentinelrag"
-version = "0.2.1"
+version = "0.2.2"
 description = "RAG supply-chain CI: retrieval regression, answer grounding, and corpus poison/hygiene gates with evidence, JUnit, and SARIF"
 readme = "README.md"
 license = { text = "MIT" }

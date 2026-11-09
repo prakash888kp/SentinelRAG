@@ -66,10 +66,13 @@ Outputs: `.sentinelrag/gate/` · Policy: `config/gate_policy.yaml`
 **Plug into GitHub Actions**
 
 ```yaml
-- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.1
+- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.2
   with:
     refresh: "true"
+    app-bound-check: "true"  # prove harmful chunk-size fails Retrieve
 ```
+
+> Default `run` is **fixture-bound** (bundled corpus + reference chunker). A green MockLLM gate does not by itself prove *your* app chunker change is safe. Use `sentinelrag-gate app-bound-check` or an adapter that indexes chunks from your revision — see [CI cookbook](docs/CI_COOKBOOK.md).
 
 **Bring scores from other evaluators**
 

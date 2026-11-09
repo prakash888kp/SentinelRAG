@@ -31,15 +31,25 @@ def load_adapter(path: Path) -> Callable[[], dict[str, Any]]:
 
 def bundle_from_adapter(path: Path) -> EvidenceBundle:
     metrics = load_adapter(path)()
-    bundle = EvidenceBundle(schema=SCHEMA_ID)
+    bundle = EvidenceBundle(schema=SCHEMA_ID, binding_mode="app")
     bundle.metrics = dict(metrics.get("metrics", metrics))
     bundle.security_probes = dict(metrics.get("security_probes", {}))
+    bundle.app_revision = metrics.get("app_revision") or metrics.get("commit")
+    bundle.commit = bundle.app_revision
+    chunker = metrics.get("chunker_config")
+    if isinstance(chunker, dict):
+        bundle.chunker_config = dict(chunker)
     return bundle
 
 
 def write_adapter_template(path: Path) -> None:
     path.write_text(
-        '''"""SentinelRAG adapter — implement collect_metrics for your pipeline."""
+        '''"""SentinelRAG adapter — implement collect_metrics for your pipeline.
+
+Important: metrics must come from chunks produced by *your* application
+chunker at a known revision — not from unrelated fixture corpora — if you
+claim the gate catches chunk-size regressions in this repo.
+"""
 
 from __future__ import annotations
 
@@ -49,6 +59,12 @@ from typing import Any
 def collect_metrics() -> dict[str, Any]:
     """Return metrics + security_probes for gate policy."""
     return {
+        "app_revision": "REPLACE_WITH_GIT_SHA",
+        "chunker_config": {
+            "strategy": "fixed",
+            "chunk_size": 500,
+            "chunk_overlap": 80,
+        },
         "metrics": {
             "phase1_hybrid_recall_at_k": 0.0,
             "phase2_mean_faithfulness": 0.0,
