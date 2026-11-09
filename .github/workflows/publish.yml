@@ -1,13 +1,13 @@
 name: publish
 
-# Future flow:
+# Flow:
 #   1. Bump version in pyproject.toml + src/sentinelrag/__init__.py (+ CHANGELOG)
-#   2. Merge to main
+#   2. Merge/push to main
 #   3. git tag vX.Y.Z && git push origin vX.Y.Z
-#   → this workflow verifies version, builds, publishes to PyPI, creates the GitHub Release
+#   -> this workflow verifies version, builds, publishes to PyPI, creates the GitHub Release
 #
-# PyPI trusted publisher (already configured):
-#   Owner: prakash888kp · Repo: SentinelRAG · Workflow: publish.yml · Env: pypi
+# PyPI trusted publisher:
+#   Owner: prakash888kp / Repo: SentinelRAG / Workflow: publish.yml / Env: pypi
 
 on:
   push:
@@ -45,43 +45,32 @@ jobs:
         id: meta
         run: |
           set -euo pipefail
-          VERSION=$(python3 - <<'PY'
-          import tomllib
-          print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])
-          PY
-          INIT=$(python3 - <<'PY'
-          import pathlib, re
-          text = pathlib.Path("src/sentinelrag/__init__.py").read_text(encoding="utf-8")
-          m = re.search(r'__version__\s*=\s*"([^"]+)"', text)
-          print(m.group(1) if m else "")
-          PY
+          VERSION=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          INIT=$(python3 -c 'import pathlib,re; t=pathlib.Path("src/sentinelrag/__init__.py").read_text(encoding="utf-8"); m=re.search(r"__version__\s*=\s*\"([^\"]+)\"", t); print(m.group(1) if m else "")')
           echo "pyproject=$VERSION init=$INIT"
-          if [[ "$VERSION" != "$INIT" ]]; then
+          if [ "$VERSION" != "$INIT" ]; then
             echo "::error::pyproject.toml ($VERSION) != __init__.py ($INIT)"
             exit 1
           fi
-
-          TAG=""
-          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             TAG="${GITHUB_REF_NAME}"
             EXPECTED="v${VERSION}"
-            if [[ "$TAG" != "$EXPECTED" ]]; then
+            if [ "$TAG" != "$EXPECTED" ]; then
               echo "::error::Git tag is $TAG but package version is $VERSION (expected $EXPECTED)"
               exit 1
             fi
           else
             TAG="v${VERSION}"
           fi
-
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Build sdist + wheel
         run: |
+          set -euo pipefail
           uv sync --extra dev
           uv build
           ls -la dist/
-          # Guard: built artifacts must match declared version
           ls dist/ | grep -F "sentinelrag-${{ steps.meta.outputs.version }}"
 
       - uses: actions/upload-artifact@v4
@@ -133,19 +122,6 @@ jobs:
             echo "Release $TAG already exists — uploading assets only"
             gh release upload "$TAG" dist/* --clobber
           else
-            NOTES=$(python3 - <<'PY'
-          from pathlib import Path
-          import os, re
-          version = os.environ["VERSION"]
-          text = Path("CHANGELOG.md").read_text(encoding="utf-8")
-          # Grab ## [version] section until next ##
-          pat = rf"## \[{re.escape(version)}\].*?\n(.*?)(?=\n## |\Z)"
-          m = re.search(pat, text, flags=re.S)
-          body = m.group(1).strip() if m else f"Release {version}"
-          print(body)
-          PY
-            )
-            gh release create "$TAG" dist/* \
-              --title "v${VERSION}" \
-              --notes "$NOTES"
+            NOTES=$(python3 -c 'import os,re,pathlib; v=os.environ["VERSION"]; t=pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8"); m=re.search(rf"## \[{re.escape(v)}\].*?\n(.*?)(?=\n## |\Z)", t, flags=re.S); print((m.group(1).strip() if m else f"Release {v}"))')
+            gh release create "$TAG" dist/* --title "v${VERSION}" --notes "$NOTES"
           fi
