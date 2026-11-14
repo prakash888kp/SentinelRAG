@@ -57,6 +57,19 @@ def test_cli_parser() -> None:
     assert args.cmd == "run"
 
 
+def test_cli_version() -> None:
+    from sentinelrag import __version__
+
+    parser = build_parser()
+    try:
+        parser.parse_args(["--version"])
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("expected --version to exit 0")
+    assert __version__
+
+
 def test_examples_template_loads() -> None:
     template = project_root() / "examples" / "adapter_template.py"
     bundle = bundle_from_adapter(template)

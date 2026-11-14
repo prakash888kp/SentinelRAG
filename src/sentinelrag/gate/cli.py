@@ -135,7 +135,10 @@ def _cmd_app_bound_check(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    from sentinelrag import __version__
+
     parser = argparse.ArgumentParser(prog="sentinelrag-gate", description="SentinelRAG CI gate")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     run_p = sub.add_parser("run", help="Evaluate policy and emit SARIF/JUnit")

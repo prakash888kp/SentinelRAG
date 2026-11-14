@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3] — 2026-11-14
+
+### Added
+
+- `sentinelrag-gate --version`
+- Supply-chain CI now runs **app-bound-check** (harmful chunk-size must fail Retrieve) and stamps `GITHUB_SHA` into evidence
+- Case study + marketing docs updated for app-bound binding and Action `@v0.2.3`
+
 ## [0.2.2] — 2026-11-09
 
 ### Added

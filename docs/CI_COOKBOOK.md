@@ -27,7 +27,7 @@ The original “chunk-size tweak looked fine” incident is only closed when the
 ## Composite Action
 
 ```yaml
-- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.2
+- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.3
   with:
     refresh: "true"
     binding-mode: fixture

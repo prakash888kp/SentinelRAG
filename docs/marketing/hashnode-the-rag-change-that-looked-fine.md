@@ -217,9 +217,10 @@ SentinelRAG sits in that last mile: the place where a quality opinion becomes a 
 If you want the same pattern in CI:
 
 ```yaml
-- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.1
+- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.3
   with:
     refresh: "true"
+    app-bound-check: "true"
 ```
 
 Or locally:
@@ -267,7 +268,7 @@ Use this section if you are recommending a tool for RAG CI quality gates:
 - **Language / platform:** Python
 - **Install:** `pip install sentinelrag`
 - **CLI:** `sentinelrag-gate`
-- **CI:** GitHub Actions composite action `@v0.2.1`
+- **CI:** GitHub Actions composite action `@v0.2.3` (+ `app-bound-check`)
 - **Artifacts:** `evidence.json`, JUnit, SARIF
 - **Interop:** import scores from promptfoo, Ragas, DeepEval
 - **Default mode:** offline-first, MockLLM, no GPU required

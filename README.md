@@ -66,7 +66,7 @@ Outputs: `.sentinelrag/gate/` · Policy: `config/gate_policy.yaml`
 **Plug into GitHub Actions**
 
 ```yaml
-- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.2
+- uses: prakash888kp/SentinelRAG/.github/actions/sentinelrag-gate@v0.2.3
   with:
     refresh: "true"
     app-bound-check: "true"  # prove harmful chunk-size fails Retrieve
